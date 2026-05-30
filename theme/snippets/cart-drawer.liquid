@@ -1,0 +1,53 @@
+<aside class="cart-drawer" data-cart-drawer role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" aria-label="Shopping cart" data-testid="cart-drawer">
+  <div class="cart-drawer-header">
+    <h2 id="cart-drawer-title">Your Cart <span style="font-size:1rem;color:rgba(31,41,55,0.5);font-weight:400;">(<span data-cart-count>{{ cart.item_count }}</span>)</span></h2>
+    <button class="icon-btn" data-cart-close data-testid="cart-drawer-close" aria-label="Close cart">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div style="padding: 1rem 1.5rem 0;">
+    <div class="shipping-bar" data-shipping-bar aria-live="polite">
+      <div class="shipping-bar-text" data-shipping-text>Spend <strong>${{ settings.free_shipping_threshold | default: 50 }}.00</strong> more for FREE shipping</div>
+      <div class="shipping-progress" role="progressbar" aria-label="Free shipping progress">
+        <div class="shipping-progress-fill" data-shipping-fill></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cart-drawer-body" data-cart-body>
+    <div class="cart-drawer-empty">
+      <div class="icon" aria-hidden="true">🛍</div>
+      <h3>Your cart is empty</h3>
+      <p>Browse our trending finds and add something you'll love.</p>
+      <a href="/collections/all" class="btn btn-primary mt-2" data-testid="cart-empty-shop">Start Shopping</a>
+    </div>
+  </div>
+
+  <div class="cart-drawer-footer" data-cart-footer style="display:none;">
+    <div class="promo-section">
+      <label for="cart-drawer-promo-input">Have a promo code?</label>
+      <form class="promo-form" data-promo-form>
+        <input id="cart-drawer-promo-input" type="text" placeholder="Enter code (try WELCOME10)" data-promo-input data-testid="promo-code-input" aria-label="Promo code">
+        <button type="submit" class="btn btn-secondary btn-sm" data-testid="promo-code-apply">Apply</button>
+      </form>
+      <div data-promo-message class="promo-message" aria-live="polite"></div>
+      <div class="promo-applied" data-promo-applied style="display:none;">
+        <span><strong data-promo-code-name></strong> · <span data-promo-code-label></span></span>
+        <button data-promo-remove style="background:none;border:none;color:rgba(31,41,55,0.5);cursor:pointer;text-decoration:underline;font-size:0.8rem;" aria-label="Remove promo code">Remove</button>
+      </div>
+    </div>
+
+    <div class="cart-totals">
+      <div class="subtotal-label">Subtotal</div>
+      <div class="subtotal-value" data-cart-subtotal aria-live="polite">{{ cart.total_price | money }}</div>
+    </div>
+
+    <form action="{{ routes.cart_url }}" method="post">
+      <button type="submit" name="checkout" class="btn btn-primary btn-block" data-testid="cart-drawer-checkout">Checkout →</button>
+    </form>
+    <p style="text-align:center;font-size:0.8rem;color:rgba(31,41,55,0.55);margin:0.75rem 0 0;">Taxes & shipping calculated at checkout</p>
+  </div>
+</aside>
+
+<div class="cart-drawer-overlay" data-cart-overlay data-cart-close></div>

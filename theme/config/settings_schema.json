@@ -1,0 +1,81 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "SnagNest",
+    "theme_version": "1.0.0",
+    "theme_author": "SnagNest",
+    "theme_documentation_url": "https://snagnest.com",
+    "theme_support_email": "support@snagnest.com"
+  },
+  {
+    "name": "Brand Colors",
+    "settings": [
+      { "type": "color", "id": "color_primary", "label": "Primary (Coral)", "default": "#C9683E" },
+      { "type": "color", "id": "color_secondary", "label": "Secondary (Teal)", "default": "#E0A458" },
+      { "type": "color", "id": "color_accent", "label": "Accent (Navy)", "default": "#2B2622" },
+      { "type": "color", "id": "color_cream", "label": "Cream", "default": "#F3E9D6" },
+      { "type": "color", "id": "color_mint", "label": "Mint", "default": "#F0DCC0" },
+      { "type": "color", "id": "color_text", "label": "Text", "default": "#2B2622" },
+      { "type": "color", "id": "color_background", "label": "Page background", "default": "#FBF4E7" }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      { "type": "font_picker", "id": "heading_font", "label": "Headings", "default": "fraunces_n7" },
+      { "type": "font_picker", "id": "body_font", "label": "Body text", "default": "nunito_n4" }
+    ]
+  },
+  {
+    "name": "Branding",
+    "settings": [
+      { "type": "image_picker", "id": "logo", "label": "Logo image" },
+      { "type": "image_picker", "id": "favicon", "label": "Favicon" },
+      { "type": "text", "id": "logo_text_part1", "label": "Logo text - first word", "default": "Snag" },
+      { "type": "text", "id": "logo_text_part2", "label": "Logo text - second word", "default": "Nest" }
+    ]
+  },
+  {
+    "name": "Free Shipping",
+    "settings": [
+      { "type": "number", "id": "free_shipping_threshold", "label": "Free shipping threshold ($)", "default": 50 }
+    ]
+  },
+  {
+    "name": "Welcome Promo Popup",
+    "settings": [
+      { "type": "checkbox", "id": "promo_popup_enabled", "label": "Enable promo popup", "default": true },
+      { "type": "text", "id": "promo_popup_title", "label": "Title", "default": "Welcome to the Nest" },
+      { "type": "text", "id": "promo_popup_subtitle", "label": "Subtitle", "default": "10% off your first order over $50" },
+      { "type": "text", "id": "promo_popup_discount", "label": "Discount display", "default": "10% OFF" },
+      { "type": "text", "id": "promo_popup_code", "label": "Promo code", "default": "WELCOME10" }
+    ]
+  },
+  {
+    "name": "Bundle Upsell Popup",
+    "settings": [
+      { "type": "checkbox", "id": "bundle_upsell_enabled", "label": "Enable bundle upsell at checkout", "default": true, "info": "Shows a 'bundle &amp; save' popup when shoppers click Checkout in the cart drawer." },
+      { "type": "text", "id": "bundle_upsell_eyebrow", "label": "Eyebrow", "default": "Wait, one more thing" },
+      { "type": "text", "id": "bundle_upsell_title", "label": "Title (HTML allowed)", "default": "Bundle up & <em>save</em> before you check out" },
+      { "type": "text", "id": "bundle_upsell_subtitle", "label": "Subtitle", "default": "Add these customer favorites to your order at a discount. A great way to try something new." },
+      { "type": "textarea", "id": "bundle_upsell_items", "label": "Items", "info": "Comma-separated: emoji|name|price|color (color = mint, coral, peach, cream)", "default": "🧰|Multi-Tool Kit|14.99|coral,🌿|Wellness Roll-On|18.99|peach" },
+      { "type": "text", "id": "bundle_upsell_compare", "label": "Compare-at total ($)", "default": "33.98" },
+      { "type": "text", "id": "bundle_upsell_price", "label": "Bundle total ($)", "default": "27.18" }
+    ]
+  },
+  {
+    "name": "Contact Info",
+    "settings": [
+      { "type": "text", "id": "email", "label": "Support email", "default": "support@snagnest.com" },
+      { "type": "text", "id": "phone", "label": "Support phone", "default": "(555) 010-2025" }
+    ]
+  },
+  {
+    "name": "Social Links",
+    "settings": [
+      { "type": "url", "id": "social_instagram", "label": "Instagram URL" },
+      { "type": "url", "id": "social_facebook", "label": "Facebook URL" },
+      { "type": "url", "id": "social_tiktok", "label": "TikTok URL" }
+    ]
+  }
+]

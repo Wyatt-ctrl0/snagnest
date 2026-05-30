@@ -1,0 +1,30 @@
+{%- comment -%}
+  v4 fix: styled page template. Contact-page treatment for content pages.
+  Reassign Returns / Help / Order Lookup / Shipping Info / About
+  / Shop the Edit to use templates/page.styled.json in Shopify admin to apply.
+{%- endcomment -%}
+<section class="page-styled-hero" data-testid="page-styled-hero">
+  <div class="container">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
+    <h1>{{ page.title }}</h1>
+    {%- if section.settings.subheading != blank -%}
+      <p class="page-styled-sub">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+<section class="page-styled-body rte" data-testid="page-styled-body">
+  {{ page.content }}
+</section>
+
+{% schema %}
+{
+  "name": "Page (styled)",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Customer Care" },
+    { "type": "text", "id": "subheading", "label": "Subheading (optional)" }
+  ]
+}
+{% endschema %}

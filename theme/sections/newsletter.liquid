@@ -1,0 +1,41 @@
+<section class="newsletter" data-testid="newsletter">
+  <div class="container">
+    <div class="newsletter-inner">
+      <span class="eyebrow" style="display:inline-block;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--color-secondary);margin-bottom:1rem;">Keep In Touch</span>
+      <h2>{{ section.settings.heading | default: 'New arrivals &amp; <em>good finds</em>' }}</h2>
+      <p>{{ section.settings.subheading | default: 'Sign up for first-dibs on new arrivals, exclusive promos, and curated picks straight to your inbox.' }}</p>
+
+      {%- form 'customer', class: 'newsletter-form', id: 'NewsletterForm' -%}
+        {%- comment -%} v4 fix: render success / error feedback that was missing in v3. v11 fix: add aria-live so screen readers announce results. {%- endcomment -%}
+        <div aria-live="polite" aria-atomic="true">
+          {%- if form.posted_successfully? -%}
+            <div class="newsletter-feedback success" data-testid="newsletter-success" role="status" style="margin: 0.75rem auto; padding: 0.75rem 1.25rem; background: #F6ECDA; border-radius: 999px; color: #1b5e3a; font-weight: 600; max-width: 460px;">
+              &#10003; You&rsquo;re on the list! Watch your inbox for the first drop.
+            </div>
+          {%- endif -%}
+          {%- if form.errors -%}
+            <div class="newsletter-feedback error" data-testid="newsletter-error" role="alert" style="margin: 0.75rem auto; padding: 0.75rem 1.25rem; background: #FBEAE5; border-radius: 999px; color: #B5322C; font-weight: 600; max-width: 460px;">
+              &#10007; {{ form.errors | default_errors }}
+            </div>
+          {%- endif -%}
+        </div>
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <input type="email" name="contact[email]" placeholder="your@email.com" aria-label="Email" required data-testid="newsletter-email">
+        <button type="submit" class="btn btn-primary" data-testid="newsletter-submit">Subscribe</button>
+      {%- endform -%}
+
+      <p class="newsletter-disclaimer">By signing up, you consent to receive updates, special offers, program communications and other information via email from us.</p>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "New arrivals &amp; <em>good finds</em>" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Sign up for first-dibs on new arrivals, exclusive promos, and curated picks straight to your inbox." }
+  ],
+  "presets": [{ "name": "Newsletter" }]
+}
+{% endschema %}

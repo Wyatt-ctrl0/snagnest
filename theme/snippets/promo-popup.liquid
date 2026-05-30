@@ -1,0 +1,27 @@
+{%- if settings.promo_popup_enabled -%}
+<div class="promo-popup" data-promo-popup data-testid="promo-popup" role="dialog" aria-modal="true" aria-labelledby="promo-popup-title">
+  <div class="promo-popup-inner">
+    <button class="promo-popup-close" data-promo-popup-close data-testid="promo-popup-close" aria-label="Close popup">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="promo-popup-image">
+      <svg viewBox="0 0 64 64" width="180" height="180" aria-hidden="true">
+        <rect x="10" y="28" width="44" height="28" rx="3" fill="#C9683E"/>
+        <rect x="8" y="20" width="48" height="12" rx="3" fill="#E0A458"/>
+        <rect x="28" y="20" width="8" height="36" fill="#FBF4E7"/>
+        <path d="M32 20 Q20 8 14 14 Q8 20 32 20 Q56 20 50 14 Q44 8 32 20Z" fill="#C9683E"/>
+      </svg>
+    </div>
+    <div class="promo-popup-content">
+      <h2 id="promo-popup-title">{{ settings.promo_popup_title | default: 'Welcome to the Nest' }}</h2>
+      <p style="color:rgba(31,41,55,0.65);">{{ settings.promo_popup_subtitle | default: '10% off your first order over $50' }}</p>
+      <div class="discount">{{ settings.promo_popup_discount | default: '10% OFF' }}</div>
+      <div class="code-display">{{ settings.promo_popup_code | default: 'WELCOME10' }}</div>
+      <p style="font-size:0.85rem;color:rgba(31,41,55,0.55);margin-bottom:1rem;">Valid on orders $50+. Apply at checkout.</p>
+      <button class="btn btn-primary btn-block" data-promo-copy data-testid="promo-popup-copy">Copy Code</button>
+      <a href="/collections/all" class="btn btn-outline btn-block mt-2" data-testid="promo-popup-shop">Start Shopping</a>
+      <button class="mt-2" data-promo-popup-close style="background:none;border:none;color:rgba(31,41,55,0.5);text-decoration:underline;font-size:0.85rem;cursor:pointer;" aria-label="Dismiss popup and continue browsing">No thanks, take me to the site</button>
+    </div>
+  </div>
+</div>
+{%- endif -%}

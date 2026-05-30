@@ -1,0 +1,76 @@
+{%- assign collection = collections[section.settings.collection] -%}
+
+<section class="section" data-testid="featured-collection" style="background: var(--color-bg);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">{{ section.settings.eyebrow | default: 'Best Sellers' }}</span>
+      <h2>{{ section.settings.heading | default: 'Our current <em>favorites</em>' }}</h2>
+      <p>{{ section.settings.subheading | default: 'Hand-picked products we think you will love.' }}</p>
+    </div>
+
+    <div class="products-grid">
+      {%- if collection.products.size > 0 -%}
+        {%- for product in collection.products limit: section.settings.limit -%}
+          {% render 'product-card', product: product %}
+        {%- endfor -%}
+      {%- else -%}
+        {% comment %}
+          Placeholder products for demo (when no Shopify products exist yet
+          or no collection is connected). The first and last products are
+          shown on sale so the merchant can see what compare-at pricing
+          looks like in this theme. Set compare_at_price on real Shopify
+          products to display the same struck-through price + Save pill.
+        {% endcomment %}
+        {%- assign placeholders = 'Compact Air Purifier|Memory Foam Pillow|Foldable Cutting Board|Wireless Charging Pad|Portable Blender|Insulated Travel Mug|Silicone Kitchen Set|Cozy Weighted Blanket' | split: '|' -%}
+        {%- assign prices       = '14|49|18|34|22|12|26|44' | split: '|' -%}
+        {%- assign compares     = '19|0|0|0|0|0|0|59'        | split: '|' -%}
+        {%- assign emojis       = '💨|🛏️|🍽️|🔋|🥤|☕|🍳|🧥' | split: '|' -%}
+        {%- for ph in placeholders limit: section.settings.limit -%}
+          {%- assign compare = compares[forloop.index0] | times: 1 -%}
+          {%- assign price   = prices[forloop.index0]   | times: 1 -%}
+          <div class="product-card" data-testid="product-card-demo-{{ forloop.index }}">
+            <div class="media" style="background: {%- cycle '#ffe4d4', '#F6ECDA', '#fce8da', '#F4E8CF' -%}; display:flex; align-items:center; justify-content:center; font-size:5rem; position: relative;">
+              {{ emojis[forloop.index0] }}
+              {%- if forloop.index0 == 0 -%}<span class="badge">Bestseller</span>{%- endif -%}
+              {%- if compare > price -%}<span class="badge" style="background: var(--color-secondary); right: .75rem; left: auto;">SALE</span>{%- endif -%}
+            </div>
+            <div class="info">
+              <div class="vendor">SnagNest</div>
+              <a href="/products/sample" class="title">{{ ph }}</a>
+              <div class="price">
+                {%- if compare > price -%}
+                  <span class="compare" style="color: rgba(31,41,55,0.55); text-decoration: line-through; margin-right: .4rem; font-weight: 500;">${{ compare }}.99</span>
+                {%- endif -%}
+                <span style="color: {% if compare > price %}var(--color-primary){% else %}inherit{% endif %};">${{ price }}.99</span>
+                {%- if compare > price -%}
+                  <span class="save-pill" style="display: inline-block; margin-left: .5rem; background: rgba(95,180,184,0.15); color: var(--color-secondary); padding: .15rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 700;">Save ${{ compare | minus: price }}</span>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.show_view_all -%}
+      <div class="text-center mt-4">
+        <a href="{{ collection.url | default: '/collections/all' }}" class="btn btn-outline" data-testid="featured-view-all">View All Products</a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Collection",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Best Sellers" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Our current <em>favorites</em>" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Hand-picked products we think you will love." },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "range", "id": "limit", "label": "Products to show", "min": 4, "max": 12, "step": 4, "default": 8 },
+    { "type": "checkbox", "id": "show_view_all", "label": "Show 'View all' button", "default": true }
+  ],
+  "presets": [{ "name": "Featured Collection" }]
+}
+{% endschema %}

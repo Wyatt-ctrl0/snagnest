@@ -1,0 +1,21 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h1>All Collections</h1>
+    </div>
+    <div class="categories-grid">
+      {%- for collection in collections -%}
+        <a href="{{ collection.url }}" class="category-card bg-{{ forloop.index | modulo: 4 | plus: 1 }}">
+          <div class="icon">
+            {%- if collection.image != blank -%}
+              <img src="{{ collection.image | image_url: width: 200 }}" alt="{{ collection.title }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+            {%- else -%}
+              🐾
+            {%- endif -%}
+          </div>
+          <h3>{{ collection.title }}</h3>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>

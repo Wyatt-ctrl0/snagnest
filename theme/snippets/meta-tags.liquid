@@ -1,0 +1,48 @@
+{%- comment -%}
+  Meta tags for SEO and social sharing.
+  v12 enhancements: og:image fallback on homepage, twitter:image, og:locale, robots/canonical.
+{%- endcomment -%}
+{%- if template contains '404' or request.page_type == 'not_found' -%}
+<meta name="robots" content="noindex, nofollow">
+{%- else -%}
+<meta name="robots" content="index, follow">
+{%- endif -%}
+<link rel="canonical" href="{{ canonical_url }}">
+
+<meta property="og:site_name" content="{{ shop.name }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:title" content="{{ page_title }}">
+<meta property="og:type" content="{% if request.page_type == 'product' %}product{% elsif request.page_type == 'article' %}article{% else %}website{% endif %}">
+<meta property="og:locale" content="en_US">
+{%- if page_description -%}
+<meta property="og:description" content="{{ page_description | escape }}">
+{%- endif -%}
+
+{%- comment -%} Determine the best image for sharing: page_image for products/collections, else logo. {%- endcomment -%}
+{%- assign share_image = page_image -%}
+{%- if share_image == blank and settings.logo != blank -%}
+  {%- assign share_image = settings.logo -%}
+{%- endif -%}
+{%- if share_image != blank -%}
+<meta property="og:image" content="https:{{ share_image | image_url: width: 1200 }}">
+<meta property="og:image:secure_url" content="https:{{ share_image | image_url: width: 1200 }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:image" content="https:{{ share_image | image_url: width: 1200 }}">
+{%- endif -%}
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ page_title }}">
+{%- if page_description -%}
+<meta name="twitter:description" content="{{ page_description | escape }}">
+{%- endif -%}
+{%- if settings.social_twitter != blank -%}
+<meta name="twitter:site" content="{{ settings.social_twitter }}">
+{%- endif -%}
+
+{%- comment -%} Product-specific structured data hints {%- endcomment -%}
+{%- if request.page_type == 'product' and product != blank -%}
+  <meta property="product:price:amount" content="{{ product.price | divided_by: 100.0 }}">
+  <meta property="product:price:currency" content="{{ cart.currency.iso_code }}">
+  <meta property="product:availability" content="{% if product.available %}in stock{% else %}out of stock{% endif %}">
+{%- endif -%}

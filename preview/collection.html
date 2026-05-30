@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All finds · SnagNest</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png?v=21">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/nest.css?v=21">
+  <link rel="stylesheet" href="assets/pages.css?v=21">
+</head>
+<body>
+
+<div class="announce">Free U.S. shipping on orders over $50 &middot; 30-day no-fuss returns</div>
+
+<header class="site-header">
+  <div class="wrap nav">
+    <button class="hamburger" data-drawer-toggle aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><svg class="ic"><use href="#ic-menu"/></svg></button>
+    <a class="logo" href="index.html"><img class="logo-ic" src="assets/logo.png?v=21" alt="" aria-hidden="true">Snag<b>Nest</b></a>
+    <nav class="nav-links"><a href="collection.html" class="active">Shop all</a><a href="new-finds.html">New finds</a><a href="bundles.html">Bundles</a><a href="by-problem.html">By problem</a><a href="our-story.html">Our story</a></nav>
+    <div class="nav-icons">
+      <button class="iconbtn search" aria-label="Search"><svg class="ic"><use href="#ic-search"/></svg></button>
+      <a class="iconbtn opt" href="account.html" aria-label="Account"><svg class="ic"><use href="#ic-user"/></svg></a>
+      <a class="iconbtn opt wishbtn" href="wishlist.html" aria-label="Wishlist"><svg class="ic"><use href="#ic-heart"/></svg><span class="wish-count" data-wishlist-count hidden>0</span></a>
+      <button class="iconbtn cart" data-cart aria-label="Cart"><svg class="ic"><use href="#ic-bag"/></svg><span class="cart-count" data-cart-count hidden>0</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" data-drawer id="drawer">
+  <div class="panel">
+    <div class="d-top"><span class="logo"><img class="logo-ic" src="assets/logo.png?v=21" alt="" aria-hidden="true">Snag<b>Nest</b></span><button data-drawer-close aria-label="Close menu"><svg class="ic"><use href="#ic-close"/></svg></button></div>
+    <a href="collection.html">Shop all</a><a href="new-finds.html">New finds</a><a href="bundles.html">Bundles</a><a href="by-problem.html">By problem</a><a href="our-story.html">Our story</a>
+    <a href="account.html">Account</a><a href="wishlist.html">Wishlist</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="crumb"><a href="index.html">Home</a><span>/</span>All finds</nav>
+  <div class="coll-head">
+    <h1>All the finds</h1>
+    <p>Everything currently in the nest. Each one tested in real life before it earned a spot, with the gimmicks left at the door.</p>
+  </div>
+
+  <div class="coll-bar">
+    <div class="pills">
+      <button class="pill active" data-cat-pill="all">All</button>
+      <button class="pill" data-cat-pill="tidy">Tidy &amp; organize</button>
+      <button class="pill" data-cat-pill="cozy">Cozy home</button>
+      <button class="pill" data-cat-pill="togo">On the go</button>
+      <button class="pill" data-cat-pill="fixes">Little fixes</button>
+    </div>
+    <div class="coll-bar-right">
+      <button class="filters-toggle" data-filters-toggle aria-label="Open filters"><svg class="ic"><use href="#ic-organize"/></svg> Filters</button>
+      <select class="sortsel" aria-label="Sort finds" data-sort>
+        <option value="loved">Sort: Most loved</option>
+        <option value="new">Newest first</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="coll-layout">
+    <aside class="filters">
+      <div class="f-close"><strong>Filters</strong><button data-filters-close aria-label="Close filters"><svg class="ic"><use href="#ic-close"/></svg></button></div>
+      <div class="fgroup">
+        <h4>Price</h4>
+        <label class="fopt"><input type="checkbox" data-f="price" value="u15"> Under $15</label>
+        <label class="fopt"><input type="checkbox" data-f="price" value="15-30"> $15 to $30</label>
+        <label class="fopt"><input type="checkbox" data-f="price" value="30-50"> $30 to $50</label>
+        <label class="fopt"><input type="checkbox" data-f="price" value="o50"> Over $50</label>
+      </div>
+      <div class="fgroup">
+        <h4>Solves</h4>
+        <label class="fopt"><input type="checkbox" data-f="solve" value="tidy"> Clutter</label>
+        <label class="fopt"><input type="checkbox" data-f="solve" value="cozy"> Comfort</label>
+        <label class="fopt"><input type="checkbox" data-f="solve" value="togo"> Travel</label>
+        <label class="fopt"><input type="checkbox" data-f="solve" value="fixes"> Repairs</label>
+      </div>
+      <div class="fgroup">
+        <h4>Rating</h4>
+        <label class="fopt"><input type="checkbox" data-f="rating" value="4"> 4 stars &amp; up</label>
+        <label class="fopt"><input type="checkbox" data-f="rating" value="5"> 5 stars only</label>
+      </div>
+      <div class="fgroup">
+        <h4>Badge</h4>
+        <label class="fopt"><input type="checkbox" data-f="badge" value="top"> Top pick</label>
+        <label class="fopt"><input type="checkbox" data-f="badge" value="new"> New this week</label>
+      </div>
+    </aside>
+
+    <div>
+      <div class="coll-count" data-count style="margin-bottom:18px">Showing 8 of 12 finds</div>
+      <div class="pgrid cols-3" data-grid data-reveal-group>
+        <a class="pcard" href="product.html" data-reveal data-cat="tidy" data-price="16" data-rating="5" data-reviews="214" data-badge="top"><div class="pimg"><span class="tag honey">Top pick</span><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-tray"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(214)</span></div><div class="ttl">Drawer Tamer Tray</div><div class="desc">Ends junk-drawer chaos in one drop-in.</div><div class="row2"><span class="price">$16 <s>$22</s></span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard" href="product.html" data-reveal data-cat="cozy" data-price="24" data-rating="5" data-reviews="98" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-heater"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(98)</span></div><div class="ttl">Quiet Mini Heater</div><div class="desc">Desk-side warmth, no hum, no big bill.</div><div class="row2"><span class="price">$24</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard" href="product.html" data-reveal data-cat="tidy" data-price="12" data-rating="4" data-reviews="57" data-badge="new"><div class="pimg"><span class="tag">New</span><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-cord"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic empty"><use href="#ic-star"/></svg><span>(57)</span></div><div class="ttl">Magnetic Cord Keeper</div><div class="desc">Six cables, one tidy strip.</div><div class="row2"><span class="price">$12</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard" href="product.html" data-reveal data-cat="tidy" data-price="18" data-rating="5" data-reviews="176" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-sink"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(176)</span></div><div class="ttl">Sink Caddy Pro</div><div class="desc">Keeps the sink edge dry and sorted.</div><div class="row2"><span class="price">$18</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard" href="product.html" data-reveal data-cat="tidy" data-price="21" data-rating="5" data-reviews="131" data-badge="top"><div class="pimg"><span class="tag honey">Top pick</span><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-riser"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(131)</span></div><div class="ttl">Cabinet Shelf Risers</div><div class="desc">Doubles the space in any cupboard.</div><div class="row2"><span class="price">$21</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard" href="product.html" data-reveal data-cat="togo" data-price="27" data-rating="4" data-reviews="73" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-cubes"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic empty"><use href="#ic-star"/></svg><span>(73)</span></div><div class="ttl">Packing Cube Set</div><div class="desc">Folds a weekend into half the bag.</div><div class="row2"><span class="price">$27</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard" href="product.html" data-reveal data-cat="fixes" data-price="11" data-rating="5" data-reviews="202" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-rug"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(202)</span></div><div class="ttl">No-Slip Rug Grips</div><div class="desc">Keeps every rug flat and in place.</div><div class="row2"><span class="price">$11</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard" href="product.html" data-reveal data-cat="cozy" data-price="22" data-rating="5" data-reviews="64" data-badge="new"><div class="pimg"><span class="tag">New</span><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-mug"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(64)</span></div><div class="ttl">Smart Mug Warmer</div><div class="desc">Keeps your coffee hot to the last sip.</div><div class="row2"><span class="price">$22</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard is-hidden" href="product.html" data-reveal data-cat="cozy" data-price="15" data-rating="4" data-reviews="41" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#ic-cozy"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic empty"><use href="#ic-star"/></svg><span>(41)</span></div><div class="ttl">Door Draft Stopper</div><div class="desc">Blocks cold drafts under any door.</div><div class="row2"><span class="price">$15</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard is-hidden" href="product.html" data-reveal data-cat="tidy" data-price="14" data-rating="5" data-reviews="88" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#ic-organize"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(88)</span></div><div class="ttl">Drawer Divider Set</div><div class="desc">Splits any drawer into neat zones.</div><div class="row2"><span class="price">$14</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard is-hidden" href="product.html" data-reveal data-cat="togo" data-price="19" data-rating="4" data-reviews="52" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#ic-togo"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic empty"><use href="#ic-star"/></svg><span>(52)</span></div><div class="ttl">Leakproof Bottle Set</div><div class="desc">Travel sizes that never spill.</div><div class="row2"><span class="price">$19</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <a class="pcard is-hidden" href="product.html" data-reveal data-cat="fixes" data-price="9" data-rating="5" data-reviews="120" data-badge=""><div class="pimg"><button class="heart" aria-label="Save to wishlist" aria-pressed="false"><svg class="ic"><use href="#ic-heart"/></svg></button><div class="prod"><svg class="pi"><use href="#pr-cord"/></svg></div></div><div class="pb"><div class="stars"><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><svg class="ic"><use href="#ic-star"/></svg><span>(120)</span></div><div class="ttl">Cable Clip Pack</div><div class="desc">Sticks cables exactly where you want.</div><div class="row2"><span class="price">$9</span><button class="add" data-add data-added-label="Added">Add</button></div></div></a>
+        <div class="coll-empty">No finds match those filters yet. Try clearing a few.</div>
+      </div>
+      <div class="loadmore"><button class="btn btn-outline btn-lg" data-loadmore>Load more finds</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer"><div class="wrap">
+  <div class="fgrid">
+    <div class="fcol brand">
+      <div class="flogo"><img class="logo-ic" src="assets/logo.png?v=21" alt="" aria-hidden="true">Snag<b>Nest</b></div>
+      <p>A small nest of clever, problem-solving finds we've actually tested. Brought home so you don't have to dig.</p>
+    </div>
+    <div class="fcol"><h4>Shop</h4><a href="collection.html">All finds</a><a href="new-finds.html">New this week</a><a href="bundles.html">Bundles</a><a href="by-problem.html">By problem</a></div>
+    <div class="fcol"><h4>Help</h4><a href="shipping.html">Shipping</a><a href="returns.html">Returns</a><a href="track-order.html">Track order</a><a href="contact.html">Contact</a></div>
+    <div class="fcol"><h4>Nest</h4><a href="our-story.html">Our story</a><a href="reviews.html">Reviews</a><a href="gift-cards.html">Gift cards</a><a href="index.html#how">How we vet</a></div>
+  </div>
+  <div class="fbar">&copy; 2026 SnagNest &middot; Curated &amp; tested, never dropshipped on a whim.</div>
+</div></footer>
+
+<script src="assets/nest.js?v=21"></script>
+</body>
+</html>

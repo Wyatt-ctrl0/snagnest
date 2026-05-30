@@ -1,0 +1,80 @@
+<section class="faq-section reveal" data-testid="faq-section">
+  <div class="container faq-container">
+    <div class="section-head">
+      <div class="eyebrow">{{ section.settings.eyebrow | default: 'Common Questions' }}</div>
+      <h2>{{ section.settings.heading | default: 'Frequently <em>asked</em>' }}</h2>
+      {% if section.settings.subheading != blank %}<p>{{ section.settings.subheading }}</p>{% endif %}
+    </div>
+    <div class="faq-list">
+      {% for block in section.blocks %}
+        <details class="faq-item" {% if forloop.first %}open{% endif %} {{ block.shopify_attributes }} data-testid="faq-item-{{ forloop.index0 }}">
+          <summary data-testid="faq-toggle-{{ forloop.index0 }}">
+            <span>{{ block.settings.question }}</span>
+            <span class="faq-chev" aria-hidden="true">›</span>
+          </summary>
+          <div class="faq-answer" data-testid="faq-answer-{{ forloop.index0 }}">{{ block.settings.answer }}</div>
+        </details>
+      {% endfor %}
+    </div>
+    <div class="faq-foot">
+      <p>{{ section.settings.foot_text | default: 'Still have a question?' }}</p>
+      <a
+        href="{{ section.settings.foot_link | default: 'mailto:support@snagnest.com' }}"
+        class="btn btn-outline"
+        data-testid="faq-contact-btn"
+        data-app-mailto="support@snagnest.com"
+      >{{ section.settings.foot_button | default: 'Email Support' }}</a>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.faq-section { padding: 5rem 0; background: var(--color-bg); }
+.faq-container { max-width: 820px; }
+.faq-list { display: grid; gap: .75rem; }
+.faq-item { background: var(--color-cream); border-radius: 18px; border: 2px solid transparent; transition: border-color .25s ease; overflow: hidden; }
+.faq-item[open] { border-color: rgba(232,118,90,0.3); }
+.faq-item summary { list-style: none; cursor: pointer; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; color: var(--color-text); }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-chev { font-size: 1.5rem; color: var(--color-primary); transition: transform .25s ease; line-height: 1; }
+.faq-item[open] .faq-chev { transform: rotate(90deg); }
+.faq-answer { padding: 0 1.5rem 1.25rem; color: rgba(31,41,55,0.78); font-size: .95rem; line-height: 1.65; }
+.faq-foot { text-align: center; margin-top: 2.5rem; }
+.faq-foot p { color: rgba(31,41,55,0.7); margin-bottom: .75rem; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "FAQ",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Common Questions" },
+    { "type": "text", "id": "heading", "label": "Heading (HTML allowed)", "default": "Frequently <em>asked</em>" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "Quick answers from real humans." },
+    { "type": "text", "id": "foot_text", "label": "Footer text", "default": "Still have a question?" },
+    { "type": "text", "id": "foot_button", "label": "Footer button text", "default": "Email Support" },
+    { "type": "url", "id": "foot_link", "label": "Footer button link" }
+  ],
+  "blocks": [
+    {
+      "type": "qa",
+      "name": "Q&A",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "How fast do orders ship?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Most orders leave our hands within 1–3 business days.</p>" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [{
+    "name": "FAQ",
+    "blocks": [
+      { "type": "qa", "settings": { "question": "How fast do orders ship?", "answer": "<p>Most orders leave our hands within 1–3 business days. Once shipped, you'll get a tracking link to obsess over (we do too).</p>" } },
+      { "type": "qa", "settings": { "question": "Do you offer free shipping?", "answer": "<p>Yes! Spend $50 or more and shipping is on us within the U.S. Otherwise, flat-rate shipping is calculated at checkout.</p>" } },
+      { "type": "qa", "settings": { "question": "What's your return policy?", "answer": "<p>14-day return window on unused items in original packaging. A 4% restocking fee may apply. <a href=\"/policies/refund-policy\">See the full refund policy</a>.</p>" } },
+      { "type": "qa", "settings": { "question": "How do I track my order?", "answer": "<p>Once your order ships you will receive a confirmation email with a tracking link. You can also check your order status any time by visiting our order tracking page or replying to your confirmation email.</p>" } },
+      { "type": "qa", "settings": { "question": "Can I cancel or change my order?", "answer": "<p>Reach out to support@snagnest.com within 12 hours of placing your order and we'll do everything we can to update or cancel it before it ships.</p>" } },
+      { "type": "qa", "settings": { "question": "Do you ship internationally?", "answer": "<p>Currently we only ship within the United States, but international shipping is on the roadmap. Sign up for our newsletter to be the first to know.</p>" } }
+    ]
+  }]
+}
+{% endschema %}

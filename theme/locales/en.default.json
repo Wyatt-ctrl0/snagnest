@@ -1,0 +1,63 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "accessibility": {
+    "skip_to_text": "Skip to content",
+    "refresh_page": "Choosing a selection results in a full page refresh.",
+    "link_messages": {
+      "new_window": "Opens in a new window."
+    }
+  },
+  "general": {
+    "accessibility": {
+      "skip_to_text": "Skip to content",
+      "refresh_page": "Choosing a selection results in a full page refresh.",
+      "link_messages": {
+        "new_window": "Opens in a new window."
+      }
+    },
+    "search": {
+      "search": "Search",
+      "placeholder": "Search products...",
+      "no_results": "No results found"
+    },
+    "cart": {
+      "title": "Your Cart",
+      "empty": "Your cart is empty",
+      "subtotal": "Subtotal",
+      "checkout": "Checkout",
+      "view_cart": "View Cart"
+    },
+    "newsletter": {
+      "title": "Keep In Touch",
+      "subscribe": "Subscribe",
+      "email_placeholder": "Your email address"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to Cart",
+      "sold_out": "Sold Out",
+      "quantity": "Quantity"
+    }
+  },
+  "blogs": {
+    "article": {
+      "read_more": "Read More"
+    }
+  },
+  "customer": {
+    "login": "Log In",
+    "register": "Register",
+    "logout": "Log Out",
+    "account": "Account",
+    "orders": "Orders"
+  }
+}

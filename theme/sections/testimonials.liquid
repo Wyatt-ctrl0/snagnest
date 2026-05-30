@@ -1,0 +1,55 @@
+<section class="testimonials section reveal" data-testid="testimonials">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Customer Reviews</span>
+      <h2>{{ section.settings.heading | default: 'Real people, <em>real finds</em>' }}</h2>
+    </div>
+
+    <div class="testimonials-grid">
+      {%- for block in section.blocks -%}
+        <div class="testimonial-card" data-testid="testimonial-{{ forloop.index }}">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"{{ block.settings.text }}"</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">{{ block.settings.author | slice: 0, 1 | upcase }}</div>
+            <div>
+              <div class="testimonial-name">{{ block.settings.author }}</div>
+              <div class="testimonial-pet">{{ block.settings.pet }}</div>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Real people, <em>real finds</em>" }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        { "type": "textarea", "id": "text", "label": "Review", "default": "Exactly what I was looking for. Great quality and arrived faster than expected." },
+        { "type": "text", "id": "author", "label": "Author", "default": "Sarah M." },
+        { "type": "text", "id": "pet", "label": "Tagline (e.g. Verified Buyer)", "default": "Verified Buyer" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        { "type": "review", "settings": { "text": "The quality blew me away for the price. Arrived well-packaged and exactly as described. Already ordered two more.", "author": "Sarah M.", "pet": "Verified Buyer" } },
+        { "type": "review", "settings": { "text": "So glad I found this. Thoughtful design and it actually works the way it says it does. Will absolutely reorder.", "author": "Marcus T.", "pet": "Verified Buyer" } },
+        { "type": "review", "settings": { "text": "Bought this as a gift and the person loved it. Great find. The packaging was really nice too.", "author": "Priya K.", "pet": "Verified Buyer" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,111 @@
+{%- if section.settings.show_announcement -%}
+<div class="announcement" data-testid="announcement-bar">
+  <div class="container">
+    <span class="announcement-paw" aria-hidden="true">{%- render 'icon-glyph', glyph: 'bag' -%}</span>
+    {{ section.settings.announcement_text }}
+    {%- if section.settings.announcement_link != blank -%}
+      <a href="{{ section.settings.announcement_link }}">{{ section.settings.announcement_link_text }}</a>
+    {%- endif -%}
+  </div>
+</div>
+{%- endif -%}
+
+<style>
+  /* v7 logo override - tight header padding, prominent logo */
+  header.site-header { padding-top: 0 !important; padding-bottom: 0 !important; }
+  header.site-header .header-inner {
+    min-height: 0 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    align-items: center !important;
+  }
+  header.site-header .header-logo { height: auto !important; max-height: none !important; padding: 0 !important; margin: 0 !important; }
+  header.site-header .header-logo-img,
+  header.site-header a.header-logo img,
+  header.site-header a img.header-logo-img {
+    height: 130px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    display: block !important;
+    margin: 0 !important;
+  }
+  /* v21: announcement paw rendered as inline SVG (was 🐾 emoji) */
+  .announcement .announcement-paw { display: inline-flex; vertical-align: -2px; margin-right: 6px; }
+  .announcement .announcement-paw .ms-icon { width: 15px; height: 15px; }
+  @media (max-width: 768px) {
+    header.site-header .header-inner { padding-top: 4px !important; padding-bottom: 4px !important; }
+    header.site-header .header-logo-img,
+    header.site-header a.header-logo img,
+    header.site-header a img.header-logo-img {
+      height: 80px !important;
+    }
+  }
+</style>
+
+<header class="site-header" data-testid="site-header">
+  <div class="header-inner">
+    <button class="icon-btn mobile-menu-btn" data-mobile-nav-toggle aria-label="Open menu">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+
+    <nav class="header-nav" aria-label="Main">
+      <a href="/collections/best-sellers">Hot</a>
+      <a href="/collections/all">Shop All</a>
+      <a href="/collections/bundles">Bundles</a>
+      <a href="/collections/new">New</a>
+      <a href="/pages/about">Our Story</a>
+      <a href="/pages/contact">Contact</a>
+    </nav>
+
+    <a href="/" class="header-logo">
+      {%- if settings.logo != blank -%}
+        <img src="{{ settings.logo | image_url: width: 600 }}" alt="{{ shop.name }}" class="header-logo-img">
+      {%- else -%}
+        <img src="{{ 'logo.png' | asset_url }}" alt="{{ shop.name }}" class="header-logo-img">
+      {%- endif -%}
+    </a>
+
+    <div class="header-actions">
+      <a href="/account" class="icon-btn" aria-label="Account">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+      <a href="/pages/wishlist" class="icon-btn" aria-label="Wishlist">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span class="cart-count wishlist-count" data-wishlist-count data-count="0" hidden>0</span>
+      </a>
+      <button class="icon-btn" data-cart-toggle aria-label="Open cart">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-count" data-cart-count data-count="{{ cart.item_count }}">{{ cart.item_count }}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<aside class="mobile-nav" data-mobile-nav>
+  <button class="icon-btn mobile-nav-close" data-mobile-nav-close aria-label="Close menu">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <ul>
+    <li><a href="/collections/best-sellers">Hot</a></li>
+    <li><a href="/collections/all">Shop All</a></li>
+    <li><a href="/collections/bundles">Bundles</a></li>
+    <li><a href="/collections/new">New</a></li>
+    <li><a href="/pages/about">Our Story</a></li>
+    <li><a href="/pages/contact">Contact</a></li>
+    <li><a href="/account">Account</a></li>
+  </ul>
+</aside>
+<div class="mobile-nav-overlay" data-mobile-nav-overlay></div>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    { "type": "checkbox", "id": "show_announcement", "label": "Show announcement bar", "default": true },
+    { "type": "text", "id": "announcement_text", "label": "Announcement text", "default": "Free U.S. shipping on orders over $50" },
+    { "type": "text", "id": "announcement_link_text", "label": "Link text", "default": "Learn more" },
+    { "type": "url", "id": "announcement_link", "label": "Link URL" }
+  ]
+}
+{% endschema %}

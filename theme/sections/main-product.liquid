@@ -1,0 +1,2005 @@
+{%- assign product = product -%}
+
+{%- comment -%}
+  Auto-detect a related bundle from /collections/bundles by tag overlap; fall
+  back to the first OTHER bundle that is AVAILABLE. v18 (2026-05-26): both
+  loops now require bundle.available so we never link customers to a Sold-Out
+  bundle from the PDP aside.
+{%- endcomment -%}
+{%- assign bundle_collection = collections.bundles -%}
+{%- assign related_bundle = blank -%}
+{%- if bundle_collection.products.size > 0 -%}
+  {%- for bundle in bundle_collection.products -%}
+    {%- if bundle.id != product.id and bundle.available -%}
+      {%- for tag in product.tags -%}
+        {%- if bundle.tags contains tag -%}
+          {%- assign related_bundle = bundle -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if related_bundle != blank -%}{%- break -%}{%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if related_bundle == blank -%}
+    {%- for bundle in bundle_collection.products -%}
+      {%- if bundle.id != product.id and bundle.available -%}{%- assign related_bundle = bundle -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%}
+  v18 (2026-05-26): the inline-FAQ-in-description workaround is gone. All
+  product-specific FAQ content now lives in product.metafields.custom.faqs_v2.
+  See also: how_it_works, why_we_picked, sizing_guide, who_its_for metafields.
+{%- endcomment -%}
+
+{%- comment -%}
+  v18 (2026-05-26): single-dog rescue card removed. Replaced with three
+  stacked left-rail cards rendered under the bundle aside:
+    1. Tester card — all three dogs (Jack / Sophie / Molly) with photos
+    2. Reviews snapshot — honest empty state pre-launch, Judge.me-driven once reviews land
+    3. Ours vs General — brand-level comparison (no name-drops)
+  Order chosen for scroll psychology: brand connection first (Tester), then
+  social proof (Reviews), then rational comparison (Ours vs General).
+
+  is_bundle is hoisted here so every downstream check uses the same flag
+  (bundle aside suppression, "What's inside" vs "Why we picked it" card
+  label, Promise card first bullet differentiation).
+{%- endcomment -%}
+{%- comment -%}
+  Bundle detection: primary path is bundle_contents metafield (data-driven).
+  Tag fallback ('bundle' in product.tags) catches the edge case where a bundle
+  is published before the bundle_contents metafield is wired up, so the Promise
+  card and "What's inside" label still relabel correctly.
+{%- endcomment -%}
+{%- assign is_bundle = false -%}
+{%- if product.metafields.custom.bundle_contents != blank -%}
+  {%- assign is_bundle = true -%}
+{%- elsif product.tags contains 'bundle' -%}
+  {%- assign is_bundle = true -%}
+{%- endif -%}
+
+<div class="product-page" data-testid="product-page">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a href="/">Home</a> <span>›</span>
+      <a href="/collections/all">Shop</a> <span>›</span>
+      <span aria-current="page">{{ product.title }}</span>
+    </nav>
+
+    {%- comment -%}
+      v18 (2026-05-26): three direct grid children so mobile (1-col) order is:
+        gallery → details (buy-box first) → side-cards (bundle + tester/reviews/compare).
+      On desktop (≥768px) we use explicit row placement so .product-side-cards
+      slots into the LEFT column under .product-gallery, while .product-details
+      spans both rows on the RIGHT.
+    {%- endcomment -%}
+    <div class="product-grid-main">
+      <div class="product-gallery">
+        <div class="main-img" data-lightbox="{{ product.featured_image | image_url: width: 2000 }}">
+          {%- if product.featured_image != blank -%}
+            <img src="{{ product.featured_image | image_url: width: 1200 }}" alt="{{ product.title }}" data-product-main-img>
+          {%- else -%}
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:7rem;background:var(--color-mint);">🛍</div>
+          {%- endif -%}
+          {%- if product.compare_at_price > product.price -%}
+            <span class="product-badge product-badge-sale">{{ product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round }}% OFF</span>
+          {%- endif -%}
+        </div>
+        {%- if product.images.size > 1 -%}
+          <div class="product-thumbs" role="group" aria-label="{{ product.title }} additional photos">{%- comment -%} v20 A6: was role="tablist" without tab child semantics, switched to role="group" so screen readers don't announce a malformed tablist. {%- endcomment -%}
+            {%- for img in product.images -%}
+              <button type="button" data-product-thumb data-img="{{ img | image_url: width: 1200 }}" data-img-large="{{ img | image_url: width: 2000 }}" class="{% if forloop.first %}is-active{% endif %}" aria-label="View image {{ forloop.index }} of {{ product.images.size }}">
+                <img src="{{ img | image_url: width: 200 }}" alt="">
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>{%- comment -%} /.product-gallery — closes here so side cards become a sibling grid child {%- endcomment -%}
+
+      <div class="product-side-cards">
+
+        {%- comment -%}
+          BUNDLE upsell — left column under the gallery thumbs. v17 dropped the
+          bundle hero image; "What's inside" thumbnail row pulls from
+          custom.bundle_contents. v18 (2026-05-26): hide the aside on bundle
+          PDPs themselves so we don't suggest another bundle when the user is
+          already on a bundle page.
+        {%- endcomment -%}
+        {%- if related_bundle != blank and is_bundle == false -%}
+          {%- assign bundle_savings = related_bundle.compare_at_price | minus: related_bundle.price -%}
+          {%- assign bundle_contents = related_bundle.metafields.custom.bundle_contents.value -%}
+          <aside class="product-bundle product-bundle-lowered">
+            <div class="product-bundle-head">
+              <span class="product-bundle-eyebrow">Bundle &amp; Save</span>
+              <h3 class="product-bundle-heading">{{ related_bundle.title }}</h3>
+            </div>
+            <p class="product-bundle-description">{{ related_bundle.description | strip_html | truncatewords: 25 }}</p>
+
+            {%- if bundle_contents.size > 0 -%}
+              <div class="product-bundle-contents" aria-labelledby="bundle-contents-label-{{ related_bundle.id }}">
+                <p class="product-bundle-contents-label" id="bundle-contents-label-{{ related_bundle.id }}">What's inside</p>
+                <ul class="product-bundle-contents-grid" data-count="{{ bundle_contents.size }}">
+                  {%- for item in bundle_contents -%}
+                    <li>
+                      {%- comment -%}
+                        Each thumbnail links to its product PDP so a customer
+                        previewing the bundle can dig into any specific item.
+                        Self-link guard: when the user is ALREADY on this
+                        product's PDP (item.handle == product.handle), render
+                        a non-clickable span with aria-current so we don't
+                        force a wasteful same-page reload.
+                        Accessibility: the visible title span inside the
+                        anchor forms the accessible name automatically — we
+                        intentionally don't add aria-label.
+                      {%- endcomment -%}
+                      {%- if item.handle == product.handle -%}
+                        <span class="product-bundle-contents-link is-current" aria-current="page" data-testid="bundle-content-link-{{ item.handle }}">
+                          <span class="product-bundle-contents-thumb">
+                            {%- if item.featured_image -%}
+                              <img src="{{ item.featured_image | image_url: width: 240 }}" alt="{{ item.title | escape }}" loading="lazy" width="120" height="120">
+                            {%- else -%}
+                              <span class="product-bundle-contents-fallback" aria-hidden="true">{{ item.title | slice: 0, 1 | upcase }}</span>
+                            {%- endif -%}
+                          </span>
+                          <span class="product-bundle-contents-title">{{ item.title }}</span>
+                        </span>
+                      {%- else -%}
+                        <a href="{{ item.url }}" class="product-bundle-contents-link" data-testid="bundle-content-link-{{ item.handle }}">
+                          <span class="product-bundle-contents-thumb">
+                            {%- if item.featured_image -%}
+                              <img src="{{ item.featured_image | image_url: width: 240 }}" alt="{{ item.title | escape }}" loading="lazy" width="120" height="120">
+                            {%- else -%}
+                              <span class="product-bundle-contents-fallback" aria-hidden="true">{{ item.title | slice: 0, 1 | upcase }}</span>
+                            {%- endif -%}
+                          </span>
+                          <span class="product-bundle-contents-title">{{ item.title }}</span>
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            <div class="product-bundle-cta">
+              <div class="product-bundle-pricing">
+                {%- if bundle_savings > 0 -%}
+                  <span class="product-bundle-strike">{{ related_bundle.compare_at_price | money }}</span>
+                {%- endif -%}
+                <span class="product-bundle-price">Bundle: {{ related_bundle.price | money }}</span>
+                {%- if bundle_savings > 0 -%}
+                  <span class="product-bundle-save">Save {{ bundle_savings | money }}</span>
+                {%- endif -%}
+              </div>
+              <a href="{{ related_bundle.url }}" class="btn btn-outline btn-block product-bundle-btn">Shop the Bundle →</a>
+              <p class="product-bundle-note">
+                {%- if bundle_savings > 0 -%}Saves {{ bundle_savings | money }} versus buying the pieces on their own. {% endif -%}Ships free on U.S. orders over $50.
+              </p>
+            </div>
+          </aside>
+        {%- endif -%}
+
+        {%- comment -%}
+          v19 (2026-05-27): bundle-own "What's inside" thumbnail grid. Mirrors the
+          related-bundle aside above, but fires on bundle PDPs themselves (is_bundle
+          == true) so a customer landing directly on a kit PDP gets the same visual
+          breakdown of what they're getting. No "Shop the Bundle" CTA needed since
+          they're already on the bundle. Items still link to their individual PDPs
+          (self-link guard for the edge case where a bundle lists itself).
+        {%- endcomment -%}
+        {%- if is_bundle and product.metafields.custom.bundle_contents != blank -%}
+          {%- assign own_bundle_contents = product.metafields.custom.bundle_contents.value -%}
+          {%- if own_bundle_contents.size > 0 -%}
+            <aside class="product-bundle product-bundle-lowered product-bundle-own" aria-labelledby="own-bundle-label">
+              <div class="product-bundle-head">
+                <span class="product-bundle-eyebrow">In this kit</span>
+                <h3 class="product-bundle-heading" id="own-bundle-label">What’s inside</h3>
+              </div>
+              <div class="product-bundle-contents product-bundle-contents-own">
+                <ul class="product-bundle-contents-grid" data-count="{{ own_bundle_contents.size }}">
+                  {%- for item in own_bundle_contents -%}
+                    <li>
+                      {%- if item.handle == product.handle -%}
+                        <span class="product-bundle-contents-link is-current" aria-current="page" data-testid="own-bundle-content-{{ item.handle }}">
+                          <span class="product-bundle-contents-thumb">
+                            {%- if item.featured_image -%}
+                              <img src="{{ item.featured_image | image_url: width: 240 }}" alt="{{ item.title | escape }}" loading="lazy" width="120" height="120">
+                            {%- else -%}
+                              <span class="product-bundle-contents-fallback" aria-hidden="true">{{ item.title | slice: 0, 1 | upcase }}</span>
+                            {%- endif -%}
+                          </span>
+                          <span class="product-bundle-contents-title">{{ item.title }}</span>
+                        </span>
+                      {%- else -%}
+                        <a href="{{ item.url }}" class="product-bundle-contents-link" data-testid="own-bundle-content-{{ item.handle }}">
+                          <span class="product-bundle-contents-thumb">
+                            {%- if item.featured_image -%}
+                              <img src="{{ item.featured_image | image_url: width: 240 }}" alt="{{ item.title | escape }}" loading="lazy" width="120" height="120">
+                            {%- else -%}
+                              <span class="product-bundle-contents-fallback" aria-hidden="true">{{ item.title | slice: 0, 1 | upcase }}</span>
+                            {%- endif -%}
+                          </span>
+                          <span class="product-bundle-contents-title">{{ item.title }}</span>
+                        </a>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            </aside>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- comment -%}
+          v18 (2026-05-26): three stacked left-rail cards replacing the
+          single-dog rescue card. Order is intentional — brand connection,
+          then social proof, then rational comparison. All three render on
+          every PDP in the same order.
+        {%- endcomment -%}
+
+        {%- comment -%}
+          1 — The Pack card. Eyebrow is "Picked with" (not "Tested by") so the
+          card is true for both single products (we picked them with the pack
+          in mind) and bundles (we curated the kit around what works for the
+          pack). "Tested by" implied individual-SKU dog testing across the
+          whole catalog, which isn't substantiated on most products.
+        {%- endcomment -%}
+        <aside class="pdp-side-card pdp-tester" aria-labelledby="tester-title-{{ product.id }}">
+          <p class="pdp-side-card-eyebrow">Picked by our team</p>
+          <h3 class="pdp-side-card-heading" id="tester-title-{{ product.id }}">How we find things</h3>
+          <ul class="pdp-tester-list" role="list">
+            <li class="pdp-tester-row">
+              <span class="pdp-tester-photo pdp-tester-photo-fallback" aria-hidden="true" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem;">🔍</span>
+              <div class="pdp-tester-body">
+                <p class="pdp-tester-name">We research</p>
+                <p class="pdp-tester-role">Trends and real problems</p>
+                <p class="pdp-tester-line">We track what people are buying and talking about, then dig into what actually works.</p>
+              </div>
+            </li>
+            <li class="pdp-tester-row">
+              <span class="pdp-tester-photo pdp-tester-photo-fallback" aria-hidden="true" style="display:flex;align-items:center;justify-content:font-size:1.8rem;">✓</span>
+              <div class="pdp-tester-body">
+                <p class="pdp-tester-name">We vet</p>
+                <p class="pdp-tester-role">Quality and honest reviews</p>
+                <p class="pdp-tester-line">Before anything lands here, we check materials, sourcing, and what real buyers are saying.</p>
+              </div>
+            </li>
+            <li class="pdp-tester-row">
+              <span class="pdp-tester-photo pdp-tester-photo-fallback" aria-hidden="true" style="display:flex;align-items:center;justify-content:font-size:1.8rem;">❤</span>
+              <div class="pdp-tester-body">
+                <p class="pdp-tester-name">We stand behind it</p>
+                <p class="pdp-tester-role">14-day returns, no runaround</p>
+                <p class="pdp-tester-line">If something does not work for you, our return policy is clear and straightforward.</p>
+              </div>
+            </li>
+          </ul>
+          <p class="pdp-tester-footnote">We only list things our team would buy themselves.</p>
+        </aside>
+
+        {%- comment -%}
+          2 — Reviews snapshot. Honest empty state pre-launch (no fake stars
+          or counts). When Judge.me writes data to product.metafields.judgeme
+          (rating + review_count after first reviews land), upgrade the card
+          to show real numbers automatically.
+        {%- endcomment -%}
+        {%- comment -%}
+          Rating is coerced to a number with `| times: 1` so a stray non-numeric
+          value never leaks into the aria-label. The heading id is constant
+          ("reviews-snap-title-...") and a heading element exists in BOTH
+          branches so aria-labelledby never orphans.
+        {%- endcomment -%}
+        {%- assign jdgm_rating = product.metafields.judgeme.rating | default: 0 | times: 1 -%}
+        {%- assign jdgm_count = product.metafields.judgeme.review_count | default: 0 | plus: 0 -%}
+        {%- comment -%}
+          Star rendering: build a filled/empty star string from the actual rating.
+          Was hard-coded "★★★★★" — misrepresented sub-5 ratings.
+        {%- endcomment -%}
+        {%- assign jdgm_full_stars = jdgm_rating | round -%}
+        {%- if jdgm_full_stars > 5 -%}{%- assign jdgm_full_stars = 5 -%}{%- endif -%}
+        {%- if jdgm_full_stars < 0 -%}{%- assign jdgm_full_stars = 0 -%}{%- endif -%}
+        {%- assign jdgm_empty_stars = 5 | minus: jdgm_full_stars -%}
+        {%- capture jdgm_stars_str -%}{% for i in (1..jdgm_full_stars) %}★{% endfor %}{% for i in (1..jdgm_empty_stars) %}☆{% endfor %}{%- endcapture -%}
+        {%- comment -%} v19 (2026-05-26): hide the pdp-reviews-snap side card entirely when there are no reviews. The bottom "From the pack" widget already handles the empty state; duplicating "No reviews yet" twice on every PDP was a louder negative than a single empty state. Card returns automatically once the first review lands. Also softened "verified buyers" → "buyers" since Judge.me "verified" only means the buyer email matched the order — not that the review itself was vetted. {%- endcomment -%}
+        {%- if jdgm_count > 0 or jdgm_rating > 0 -%}
+        <aside class="pdp-side-card pdp-reviews-snap" aria-labelledby="reviews-snap-title-{{ product.id }}">
+          <p class="pdp-side-card-eyebrow">Customer reviews</p>
+          <h3 class="pdp-side-card-heading" id="reviews-snap-title-{{ product.id }}">{{ jdgm_count }} {% if jdgm_count == 1 %}review{% else %}reviews{% endif %}</h3>
+          <div class="pdp-reviews-snap-row">
+            <div class="pdp-reviews-snap-rating">{{ jdgm_rating }}</div>
+            <div>
+              <div class="pdp-reviews-snap-stars" aria-label="{{ jdgm_rating }} out of 5 stars">{{ jdgm_stars_str }}</div>
+              <div class="pdp-reviews-snap-meta">buyers</div>
+            </div>
+          </div>
+          <a href="#ms-reviews-section" class="pdp-reviews-snap-cta">Read all reviews →</a>
+        </aside>
+        {%- endif -%}
+
+        {%- comment -%}
+          3 — Ours vs General. Brand-level differentiators that apply to
+          every product. No competitor name-drops. If we later add per-product
+          comparison data (e.g. custom.compare metafield), this falls back to
+          that.
+        {%- endcomment -%}
+        <aside class="pdp-side-card pdp-compare" aria-labelledby="compare-title-{{ product.id }}">
+          <p class="pdp-side-card-eyebrow">The honest comparison</p>
+          <h3 class="pdp-side-card-heading" id="compare-title-{{ product.id }}">Ours vs general</h3>
+          <div class="pdp-compare-scroll">
+          <table class="pdp-compare-table">
+            <thead>
+              <tr>
+                <th scope="col"><span class="visually-hidden">Attribute</span></th>
+                <th scope="col" class="pdp-compare-ours">Ours</th>
+                <th scope="col" class="pdp-compare-general">General</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {%- comment -%} v19 (2026-05-26): "Curation" → "Picked by" — owner forbids the "curated" word family as AI-tell. {%- endcomment -%}
+                <th scope="row">Picked by</th>
+                <td><span class="pdp-compare-icon pdp-compare-yes" aria-hidden="true">✓</span>Chosen by our team, not an algorithm</td>
+                <td><span class="pdp-compare-icon pdp-compare-no" aria-hidden="true">!</span>Mass listing, no named tester</td>
+              </tr>
+              <tr>
+                <th scope="row">Returns</th>
+                <td><span class="pdp-compare-icon pdp-compare-yes" aria-hidden="true">✓</span>14-day window, clear policy</td>
+                <td><span class="pdp-compare-icon pdp-compare-no" aria-hidden="true">!</span>Varies by seller</td>
+              </tr>
+              <tr>
+                <th scope="row">Shipping</th>
+                <td><span class="pdp-compare-icon pdp-compare-yes" aria-hidden="true">✓</span>Free U.S. over $50</td>
+                <td><span class="pdp-compare-icon pdp-compare-no" aria-hidden="true">!</span>Varies</td>
+              </tr>
+              <tr>
+                <th scope="row">Support</th>
+                <td><span class="pdp-compare-icon pdp-compare-yes" aria-hidden="true">✓</span>Real team behind the store</td>
+                <td><span class="pdp-compare-icon pdp-compare-no" aria-hidden="true">!</span>Often automated only</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </aside>
+      </div>
+
+      <div class="product-details">
+        <div class="product-vendor">{{ product.vendor | default: 'SnagNest' }}</div>
+        <h1 class="product-title">{{ product.title }}</h1>
+
+        {%- comment -%}
+          v18 (2026-05-26): Judge.me preview badge near the price is HIDDEN until
+          the first real review lands. Pre-launch the empty "0 reviews" badge
+          right at the buy-box hurts trust. The full review widget + the
+          "Write a review" CTA stay visible at the bottom of the page (so
+          customers can still seed reviews). When you have ~5 real reviews,
+          delete the .jdgm-preview-badge hide CSS in this section's style block
+          and the preview badge comes back automatically.
+        {%- endcomment -%}
+        <div style='clear:both'></div>
+        <div id='judgeme_product_reviews_preview' class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}'></div>
+
+        <div class="product-price">
+          {%- if product.compare_at_price > product.price -%}<span class="compare">{{ product.compare_at_price | money }}</span>{%- endif -%}
+          {{ product.price | money }}
+          {%- if product.compare_at_price > product.price -%}<span class="save-pill">Save {{ product.compare_at_price | minus: product.price | money }}</span>{%- endif -%}
+        </div>
+
+        <div class="product-trust">
+          {%- comment -%}
+            Trust pills. v18 a11y pass: every emoji wrapped in aria-hidden
+            so screen readers don't say "truck" / "leftward-arrow" / "heart".
+            HSPA spelled out (was "1% to HSPA" — opaque acronym).
+          {%- endcomment -%}
+          <div class="trust-pill"><span aria-hidden="true">🚚</span> Free over $50</div>
+          <div class="trust-pill"><span aria-hidden="true">↩</span> 14-day returns</div>
+          <div class="trust-pill"><span aria-hidden="true">❤</span> Team-picked finds</div>
+        </div>
+
+        {%- form 'product', product, id: 'ProductForm' -%}
+          {%- unless product.has_only_default_variant -%}
+            <script type="application/json" data-product-variants>
+            [{%- for v in product.variants -%}{%- if forloop.first == false %},{% endif -%}{"id":{{ v.id }},"option1":{{ v.option1 | json }},"option2":{{ v.option2 | json }},"option3":{{ v.option3 | json }},"price":{{ v.price }},"available":{{ v.available }}}{%- endfor -%}]
+            </script>
+            {%- for option in product.options_with_values -%}
+              {%- assign option_position = forloop.index -%}
+              <div class="product-options">
+                <div class="option-label">{{ option.name }}: <span class="option-selected" data-option-display="{{ option.name }}">{{ option.selected_value | default: option.values.first }}</span></div>
+                <div class="option-values" role="radiogroup" aria-label="{{ option.name }}">
+                  {%- for value in option.values -%}
+                    <button type="button" class="option-value {% if forloop.first %}is-active{% endif %}" data-option-value data-option-position="{{ option_position }}" data-option-group="{{ option.name }}" data-value="{{ value | escape }}" role="radio" aria-checked="{% if forloop.first %}true{% else %}false{% endif %}">{{ value }}</button>
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          {%- endunless -%}
+
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" data-variant-id-input>
+
+          <div class="product-quantity">
+            <div class="qty-control">
+              <button type="button" onclick="this.nextElementSibling.value=Math.max(1, parseInt(this.nextElementSibling.value)-1)" aria-label="Decrease quantity">−</button>
+              <input type="number" name="quantity" value="1" min="1" aria-label="Quantity">
+              <button type="button" onclick="this.previousElementSibling.value=parseInt(this.previousElementSibling.value)+1" aria-label="Increase quantity">+</button>
+            </div>
+            <button type="submit" class="btn btn-primary" style="flex:1" data-product-atc-primary{%- unless product.available %} disabled aria-disabled="true"{% endunless -%}>
+              {%- if product.available -%}Add to Cart · {{ product.price | money }}{%- else -%}Sold Out{%- endif -%}
+            </button>
+          </div>
+        {%- endform -%}
+
+        {%- comment -%} ============ v18 UNIFIED PDP SECTIONS ============
+          Each section renders only when its metafield has content. Author copy in
+          Shopify admin under Products → [product] → Metafields:
+            • custom.how_it_works  (rich text)
+            • custom.why_we_picked (multi-line, one bullet per line)
+            • custom.sizing_guide  (multi-line, one row per line)
+            • custom.faqs_v2       (Q|A~~Q|A multi-line)
+            • custom.who_its_for   (rich text)
+          The "SnagNest promise" is always rendered (shared template copy).
+        {%- endcomment -%}
+
+        {%- assign has_how    = product.metafields.custom.how_it_works -%}
+        {%- assign has_why    = product.metafields.custom.why_we_picked -%}
+        {%- assign has_sizing = product.metafields.custom.sizing_guide -%}
+        {%- assign has_faqs   = product.metafields.custom.faqs_v2 -%}
+        {%- assign has_who    = product.metafields.custom.who_its_for -%}
+
+        {%- comment -%}
+          Description handling: if ANY metafield is set, the description has already
+          been migrated to structured sections. To avoid double-rendering the H2 blocks
+          (which still live in product.description so the live v17 theme keeps working
+          until v18 publishes), we render only the pre-first-<h2> portion of the
+          description as a lede. Products with no metafields filled get the full
+          description as before — no regression.
+        {%- endcomment -%}
+        {%- if has_how != blank or has_why != blank or has_sizing != blank or has_faqs != blank or has_who != blank -%}
+          {%- comment -%}
+            Description-lede extraction: when ANY metafield is set, render only
+            the FIRST <p> as the lede. The rest of the description (subsequent
+            paragraphs, <ul> bullets, H2 sections) is now sourced from
+            metafields, so re-rendering it would duplicate copy.
+            Safety: only do the strip when the description actually STARTS with
+            a <p> tag (case-insensitive, whitespace-tolerant). If it starts with
+            something else (an unmigrated future product with H2 first, etc.),
+            skip the lede render to avoid producing malformed HTML like
+            "<full description without </p></p>".
+          {%- endcomment -%}
+          {%- assign desc_trimmed = product.description | strip -%}
+          {%- assign desc_head = desc_trimmed | slice: 0, 3 | downcase -%}
+          {%- if desc_head == '<p>' or desc_head == '<p ' -%}
+            {%- assign description_lede = product.description | split: '</p>' | first | append: '</p>' -%}
+            {%- assign lede_text = description_lede | strip_html | strip -%}
+            {%- if lede_text != blank -%}
+              <div class="product-description rte">{{ description_lede }}</div>
+            {%- endif -%}
+          {%- else -%}
+            {%- comment -%} Description doesn't start with <p> — extraction can't run safely. Render the full description as a fallback so we never ship a buy-box with no descriptive text above it. {%- endcomment -%}
+            <div class="product-description rte">{{ product.description }}</div>
+          {%- endif -%}
+        {%- else -%}
+          <div class="product-description rte">{{ product.description }}</div>
+        {%- endif -%}
+
+        {%- comment -%}
+          Rich-text content check: rendering the metafield through metafield_tag
+          gives us the actual HTML. We strip it to plain text and check
+          non-blank — this protects against the case where a metafield object
+          exists but its AST is empty (which would otherwise emit an empty
+          wrapper div on the page).
+        {%- endcomment -%}
+        {%- assign how_html = product.metafields.custom.how_it_works | metafield_tag -%}
+        {%- assign how_text = how_html | strip_html | strip -%}
+        {%- if how_text == blank -%}{%- assign how_html = '' -%}{%- endif -%}
+        {%- assign who_html = product.metafields.custom.who_its_for | metafield_tag -%}
+        {%- assign who_text = who_html | strip_html | strip -%}
+        {%- if who_text == blank -%}{%- assign who_html = '' -%}{%- endif -%}
+
+        {%- comment -%}
+          UNIFIED 4-CARD INFO STACK (v18 2026-05-26): every PDP renders
+          exactly four cards in this grid — How it works, Why we picked it
+          (or What's inside on bundles), the SnagNest promise (further
+          down), and Who it's for. Sizing guide was previously a conditional
+          5th card here; it moved to its own accordion below the buy-box
+          so the grid count stays constant across all 36 products. Honors
+          the owner's "ALL MATCH IN DESIGN" requirement without losing the
+          sizing info for products that have it.
+        {%- endcomment -%}
+        {%- if how_html != '' or has_why != blank -%}
+          <div class="product-info-stack product-info-stack-v2">
+            {%- if how_html != '' -%}
+              <div class="info-card">
+                <div class="info-card-title">✦ How it works</div>
+                <div class="info-card-body rte">{{ how_html }}</div>
+              </div>
+            {%- endif -%}
+
+            {%- if has_why != blank -%}
+              {%- comment -%}
+                On single products, this card is editorial rationale ("Why we
+                picked it"). On bundles, the same metafield holds a parts list
+                ("Item Name: detail"), so relabel to "What's inside" and bold
+                the item prefix — keeping the card chrome identical for design
+                parity but the label honest about the content.
+              {%- endcomment -%}
+              <div class="info-card">
+                {%- if is_bundle -%}
+                  <div class="info-card-title">📦 What's inside</div>
+                {%- else -%}
+                  <div class="info-card-title">✓ Why we picked it</div>
+                {%- endif -%}
+                <ul class="info-card-bullets{% if is_bundle %} info-card-bullets-plain{% endif %}">
+                  {%- assign why_lines = product.metafields.custom.why_we_picked | newline_to_br | split: '<br />' -%}
+                  {%- for line in why_lines -%}
+                    {%- assign trimmed = line | strip -%}
+                    {%- if trimmed != blank -%}
+                      {%- if is_bundle and trimmed contains ':' -%}
+                        {%- assign parts = trimmed | split: ':' -%}
+                        {%- assign label = parts[0] | strip -%}
+                        {%- assign rest = trimmed | remove_first: parts[0] | remove_first: ':' | strip -%}
+                        <li><strong>{{ label }}:</strong> {{ rest }}</li>
+                      {%- else -%}
+                        <li>{{ trimmed }}</li>
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} Specs / dimensions metafields kept for products that use them. {%- endcomment -%}
+        {%- if product.metafields.custom.specs != blank or product.metafields.custom.dimensions != blank -%}
+          <div class="product-info-stack">
+            <h2 class="product-info-stack-heading">Product details</h2>
+            {%- if product.metafields.custom.specs != blank -%}
+              <div class="info-card">
+                <div class="info-card-title">📋 Specs</div>
+                <dl class="info-dl">
+                  {%- assign spec_pairs = product.metafields.custom.specs | split: ',' -%}
+                  {%- for pair in spec_pairs -%}
+                    {%- assign kv = pair | split: '|' -%}
+                    <dt>{{ kv[0] }}</dt><dd>{{ kv[1] }}</dd>
+                  {%- endfor -%}
+                </dl>
+              </div>
+            {%- endif -%}
+            {%- if product.metafields.custom.dimensions != blank -%}
+              <div class="info-card">
+                <div class="info-card-title">📐 Dimensions</div>
+                <table class="info-table"><tbody>
+                  {%- assign dim_rows = product.metafields.custom.dimensions | split: ',' -%}
+                  {%- for row in dim_rows -%}
+                    {%- assign kv = row | split: '|' -%}
+                    <tr><td>{{ kv[0] }}</td><td>{{ kv[1] }}</td></tr>
+                  {%- endfor -%}
+                </tbody></table>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%}
+          Accordions render in this order for ALL PDPs:
+            1. Sizing guide (only if product has custom.sizing_guide populated)
+            2. What pet parents love
+            3. Shipping & returns
+          The sizing accordion is FIRST so size-sensitive shoppers see it
+          immediately without scrolling past general brand bullets. Open by
+          default; What pet parents love + Shipping & returns are closed so
+          one accordion sets visual focus instead of three competing.
+          Pre-counts valid lines so we don't render an empty accordion shell.
+        {%- endcomment -%}
+        {%- assign sizing_valid_count = 0 -%}
+        {%- if has_sizing != blank -%}
+          {%- assign sizing_lines = product.metafields.custom.sizing_guide | newline_to_br | split: '<br />' -%}
+          {%- for line in sizing_lines -%}
+            {%- assign trimmed = line | strip -%}
+            {%- if trimmed != blank -%}{%- assign sizing_valid_count = sizing_valid_count | plus: 1 -%}{%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- if sizing_valid_count > 0 -%}
+          <details class="product-accordion" open>
+            <summary>📐 Sizing guide</summary>
+            <ul class="product-features-list">
+              {%- for line in sizing_lines -%}
+                {%- assign trimmed = line | strip -%}
+                {%- if trimmed != blank -%}
+                  {%- if trimmed contains ':' -%}
+                    {%- assign parts = trimmed | split: ':' -%}
+                    {%- assign label = parts[0] | strip -%}
+                    {%- assign rest = trimmed | remove_first: parts[0] | remove_first: ':' | strip -%}
+                    <li><strong>{{ label }}:</strong> {{ rest }}</li>
+                  {%- else -%}
+                    <li>{{ trimmed }}</li>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </details>
+        {%- endif -%}
+
+        <details class="product-accordion"{% unless sizing_valid_count > 0 %} open{% endunless %}>
+          <summary>What our team loves about this</summary>
+          <ul class="product-features-list">
+            <li>✓ Picked by real people, not an algorithm</li>
+            <li>✓ We only list things we would buy ourselves</li>
+            <li>✓ Trending finds across home, kitchen, gadgets, and more</li>
+            <li>✓ 14-day return window. See refund policy for terms</li>
+            <li>✓ Ships in 1–3 business days from the USA</li>
+          </ul>
+        </details>
+
+        <details class="product-accordion">
+          <summary>Shipping & returns</summary>
+          <p>Free U.S. shipping on orders over $50. Under $50, flat-rate shipping is calculated at checkout. We ship to all 50 states plus Alaska and Hawaii. Orders ship within 1–3 business days. Returns accepted within 14 days of delivery on unused items in original packaging. A 4% restocking fee may apply. <a href="/policies/shipping-policy">Shipping policy</a> · <a href="/policies/refund-policy">Refund policy</a>.</p>
+        </details>
+
+        {%- comment -%}
+          FAQ rendering. ONLY renders when the product has its own FAQ content
+          in custom.faqs_v2 (new v18) or custom.faqs (legacy v17). The previous
+          generic shipping/returns/donation fallback duplicated content already
+          in the "Shipping & returns" accordion + trust pills, so it's dropped.
+          PDPs without product-specific FAQs simply don't show a FAQ section —
+          shipping/returns info is still reachable above.
+        {%- endcomment -%}
+        {%- assign faq_source = blank -%}
+        {%- if has_faqs != blank -%}
+          {%- assign faq_source = product.metafields.custom.faqs_v2 -%}
+        {%- elsif product.metafields.custom.faqs != blank -%}
+          {%- assign faq_source = product.metafields.custom.faqs -%}
+        {%- endif -%}
+        {%- comment -%}
+          Pre-count valid FAQ pairs so we don't render an empty shell when
+          all Q|A pairs are malformed/blank.
+        {%- endcomment -%}
+        {%- assign faq_valid_count = 0 -%}
+        {%- if faq_source != blank -%}
+          {%- assign faq_pairs = faq_source | split: '~~' -%}
+          {%- for pair in faq_pairs -%}
+            {%- assign kv = pair | split: '|' -%}
+            {%- assign q = kv[0] | strip -%}
+            {%- assign a = kv[1] | strip -%}
+            {%- if q != blank and a != blank -%}{%- assign faq_valid_count = faq_valid_count | plus: 1 -%}{%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- if faq_valid_count > 0 -%}
+          <aside class="product-faq">
+            <div class="product-faq-head">
+              <span class="product-faq-eyebrow">Good Questions</span>
+              <h2 class="product-faq-heading">Frequently <em>asked</em></h2>
+            </div>
+            <div class="product-faq-list">
+              {%- assign faq_opened = false -%}
+              {%- for pair in faq_pairs -%}
+                {%- assign kv = pair | split: '|' -%}
+                {%- assign q = kv[0] | strip -%}
+                {%- assign a = kv[1] | strip -%}
+                {%- if q != blank and a != blank -%}
+                  {%- assign open_attr = '' -%}
+                  {%- if faq_opened == false -%}
+                    {%- assign open_attr = 'open' -%}
+                    {%- assign faq_opened = true -%}
+                  {%- endif -%}
+                  <details class="product-faq-item" {{ open_attr }}>
+                    <summary><span>{{ q }}</span><span class="product-faq-icon" aria-hidden="true">+</span></summary>
+                    <div class="product-faq-answer">{{ a | newline_to_br }}</div>
+                  </details>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </aside>
+        {%- endif -%}
+
+        {%- comment -%}
+          The SnagNest promise — shared across every PDP. Bundles get a
+          slightly different first bullet because they're compositions of
+          already-picked items, not separate picks (per the no-false-claims
+          rule). Detection: a product with custom.bundle_contents set IS a
+          bundle.
+        {%- endcomment -%}
+        <div class="product-info-stack">
+          <div class="info-card info-card-promise">
+            <div class="info-card-title">❤ The SnagNest promise</div>
+            <ul class="info-card-bullets">
+              {%- comment -%} v19 (2026-05-26): collapsed bundle/non-bundle branches into one line. {%- endcomment -%}
+              <li>Chosen by our team, not an algorithm</li>
+              <li>14-day returns. Up to 4% restocking fee, see refund policy</li>
+              <li>Free U.S. shipping on orders over $50</li>
+              <li>Trending finds across home, kitchen, gadgets, gifts, and more</li>
+            </ul>
+          </div>
+        </div>
+
+        {%- if who_html != '' -%}
+          <div class="product-info-stack">
+            <div class="info-card info-card-who">
+              <div class="info-card-title">✦ Who it's for</div>
+              <div class="info-card-body rte">{{ who_html }}</div>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%}
+  Mobile-only sticky ATC recovery bar (2026-05-24). Renders on every PDP but is
+  hidden by default on desktop via CSS. On mobile it appears when the in-page
+  primary ATC button scrolls out of view. Submits the same #ProductForm.
+{%- endcomment -%}
+<div class="product-sticky-atc" data-product-sticky-atc aria-hidden="true" inert>
+  <div class="product-sticky-atc-inner">
+    <div class="product-sticky-atc-info">
+      <span class="product-sticky-atc-title">{{ product.title | truncate: 28 }}</span>
+      <span class="product-sticky-atc-price">{{ product.price | money }}</span>
+    </div>
+    <button type="submit" form="ProductForm" class="btn btn-primary product-sticky-atc-btn" tabindex="-1" data-product-sticky-atc-btn{%- unless product.available %} disabled aria-disabled="true"{% endunless -%}>
+      {%- if product.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+    </button>
+  </div>
+</div>
+
+<style>
+  /* Bundle aside lives in the left column under the gallery thumbs.
+     Push it lower than the v13 default so the gallery + thumbs read first. */
+  .product-bundle-lowered { margin-top: 4rem; }
+  .product-bundle-lowered .product-bundle-cta { padding: 1.25rem; }
+
+  .product-sticky-atc {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: var(--color-bg);
+    border-top: 1.5px solid rgba(31,41,55,0.12);
+    box-shadow: 0 -6px 20px rgba(31,41,55,0.08);
+    padding: 0.65rem 1rem calc(0.65rem + env(safe-area-inset-bottom));
+    z-index: 90;
+    transform: translateY(100%);
+    transition: transform .25s ease;
+    display: none;
+  }
+  .product-sticky-atc.is-visible { transform: translateY(0); }
+  .product-sticky-atc-inner {
+    display: flex; align-items: center; gap: 0.75rem;
+    max-width: 720px; margin: 0 auto;
+  }
+  .product-sticky-atc-info {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; line-height: 1.2;
+  }
+  .product-sticky-atc-title {
+    font-family: var(--font-heading);
+    font-weight: 700; font-size: 0.92rem;
+    color: var(--color-text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .product-sticky-atc-price {
+    font-size: 0.85rem; color: rgba(31,41,55,0.78);
+  }
+  .product-sticky-atc-btn {
+    flex-shrink: 0; height: 44px; padding: 0 1.1rem; font-size: 0.95rem;
+  }
+  /* Sticky ATC shows only at the single-column mobile width (<768px) so it
+     never appears alongside the 2-column grid. v17 used max-width:1023px,
+     which let it appear at tablet widths where the grid is already 2-column —
+     violating the project rule that "sticky-bar breakpoint must be ≥ grid
+     column-split breakpoint". v18 (2026-05-26) tightens to 767px. */
+  @media (max-width: 767px) {
+    .product-sticky-atc { display: block; }
+    /* Make room for the sticky bar so it doesn't cover bottom-of-page content.
+       The padding applies to every section below the sticky-bar's z-index that
+       extends to the page bottom — including the Judge.me reviews widget and
+       the related-products grid that live outside .product-page. */
+    .product-page,
+    #ms-reviews-section,
+    .product-page ~ .section { padding-bottom: 80px; }
+  }
+
+  /* ============ v18 PDP additions ============ */
+
+  /* Unified section bullets — shared with .product-features-list style but tighter. */
+  .info-card-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .info-card-bullets li {
+    padding-left: 1.4rem;
+    position: relative;
+    color: rgba(31,41,55,0.85);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .info-card-bullets li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--color-primary);
+    font-weight: 800;
+  }
+  .info-card-bullets-plain li::before { content: "•"; color: rgba(31,41,55,0.5); }
+  .info-card-body { color: rgba(31,41,55,0.85); font-size: 0.95rem; line-height: 1.65; }
+  .info-card-body p:first-child { margin-top: 0; }
+  .info-card-body p:last-child { margin-bottom: 0; }
+
+  .info-card-promise { background: var(--color-mint, #e8f3ec); }
+  .info-card-who { background: var(--color-cream); }
+
+  /* ============ v18 grid layout override ============
+     theme.css gives .product-grid-main a 2-col 1fr 1fr at ≥768px with default
+     row flow. v18 has three grid children:
+       1. .product-gallery (img + thumbs)
+       2. .product-side-cards (bundle aside + 3 stacked cards)
+       3. .product-details (buy-box + everything in right column)
+     We want desktop = gallery top-left, side-cards bottom-left, details right
+     (spans both rows). Mobile = stacked in DOM order: gallery → details →
+     side-cards, so the buy-box appears immediately after the gallery — not
+     after a wall of cards. */
+  @media (min-width: 768px) {
+    .product-grid-main {
+      grid-template-rows: auto 1fr;
+    }
+    .product-grid-main > .product-gallery {
+      grid-column: 1; grid-row: 1;
+    }
+    .product-grid-main > .product-side-cards {
+      grid-column: 1; grid-row: 2;
+    }
+    .product-grid-main > .product-details {
+      grid-column: 2; grid-row: 1 / span 2;
+    }
+  }
+  /* Mobile order: rely on DOM (gallery → side-cards → details) but override
+     to put .product-details BEFORE .product-side-cards using `order`. */
+  @media (max-width: 767px) {
+    .product-grid-main { display: flex; flex-direction: column; }
+    .product-grid-main > .product-gallery { order: 1; }
+    .product-grid-main > .product-details { order: 2; }
+    .product-grid-main > .product-side-cards { order: 3; }
+  }
+
+  /* ============ v18 left-rail cards ============
+     Three stacked cards under the bundle aside: Tester / Reviews snapshot /
+     Ours vs General. All share the same shell styling. */
+  .pdp-side-card {
+    margin-top: 1.5rem;
+    background: var(--color-cream);
+    border-radius: 20px;
+    padding: 1.5rem;
+  }
+  .pdp-side-card-eyebrow {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-secondary);
+    margin: 0 0 0.25rem;
+  }
+  .pdp-side-card-heading {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    margin: 0 0 1rem;
+    color: var(--color-text);
+  }
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Tester card — three dogs stacked vertically */
+  .pdp-tester { background: var(--color-mint, #F0DCC0); }
+  .pdp-tester-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .pdp-tester-row {
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+  }
+  .pdp-tester-photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--color-bg);
+    border: 2px solid rgba(255,255,255,0.45);
+  }
+  .pdp-tester-photo-fallback {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; line-height: 1;
+  }
+  .pdp-tester-body { min-width: 0; flex: 1; }
+  .pdp-tester-name {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1rem;
+    margin: 0;
+    color: var(--color-text);
+  }
+  .pdp-tester-role {
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.78rem;
+    margin: 0.05rem 0 0.3rem;
+    color: rgba(31,41,55,0.78);
+  }
+  .pdp-tester-line {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: rgba(31,41,55,0.8);
+  }
+  .pdp-tester-footnote {
+    margin: 1rem 0 0;
+    font-size: 0.78rem;
+    color: rgba(31,41,55,0.78);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* Reviews snapshot card */
+  .pdp-reviews-snap-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .pdp-reviews-snap-rating {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 2.4rem;
+    line-height: 1;
+    color: var(--color-text);
+  }
+  .pdp-reviews-snap-stars {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+  .pdp-reviews-snap-meta {
+    font-size: 0.78rem;
+    color: rgba(31,41,55,0.78);
+    margin-top: 0.25rem;
+  }
+  .pdp-reviews-snap-empty {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: rgba(31,41,55,0.78);
+  }
+  .pdp-reviews-snap-cta {
+    display: block;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    padding: 0.7rem;
+    border-radius: 999px;
+    background: rgba(232,118,90,0.1);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .pdp-reviews-snap-cta:hover, .pdp-reviews-snap-cta:focus-visible {
+    background: rgba(232,118,90,0.2);
+  }
+
+  /* Ours vs General comparison */
+  .pdp-compare-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .pdp-compare-table { width: 100%; min-width: 280px; border-collapse: collapse; font-size: 0.82rem; }
+  .pdp-compare-table th, .pdp-compare-table td {
+    padding: 0.55rem 0.4rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(31,41,55,0.1);
+  }
+  .pdp-compare-table thead th {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(31,41,55,0.55);
+  }
+  .pdp-compare-table thead th.pdp-compare-ours { color: var(--color-primary); }
+  .pdp-compare-table tbody th {
+    font-weight: 700;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    color: rgba(31,41,55,0.85);
+    width: 28%;
+  }
+  .pdp-compare-table tbody tr:last-child td,
+  .pdp-compare-table tbody tr:last-child th { border-bottom: none; }
+  .pdp-compare-icon {
+    display: inline-block;
+    width: 16px; height: 16px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+  .pdp-compare-yes { background: var(--color-mint, #F0DCC0); color: var(--color-text); }
+  .pdp-compare-no { background: rgba(31,41,55,0.1); color: rgba(31,41,55,0.5); }
+
+  /* Mobile: tighten padding on side cards, drop tester photo to 56px to keep rows compact. */
+  @media (max-width: 767px) {
+    .pdp-side-card { padding: 1.25rem; }
+    .pdp-tester-photo { width: 56px; height: 56px; }
+    .pdp-tester-name { font-size: 0.95rem; }
+    .pdp-compare-table { font-size: 0.78rem; }
+    .pdp-compare-table th, .pdp-compare-table td { padding: 0.5rem 0.3rem; }
+  }
+
+  /* v18 (2026-05-26): the desktop sticky-gallery experiment is gone.
+     Everything in `.product-left-rail` (gallery + rescue card) flows
+     normally and scrolls with the page. We tried two sticky configurations
+     and both failed:
+       1. Sticky gallery + sticky-bottom rescue card → the rescue card
+          pinned to viewport bottom and overlapped the bundle CTA.
+       2. Sticky gallery + static rescue card → at ≥1024px, scrolling past
+          the gallery's natural position pinned it at top:1.25rem while the
+          static rescue card below kept scrolling up, and the gallery's
+          thumbnails ended up overlapping/covering the rescue card.
+     The fundamental problem: a static sibling below a sticky element in
+     the same scrolling container will always collide when the user scrolls
+     far enough. Fixing this cleanly would mean (a) putting the rescue card
+     INSIDE the sticky block (tall rail problem returns), or (b) moving the
+     rescue card to the right column entirely (different design). For now
+     no sticky — empty space below the rail on tall PDPs is the accepted
+     trade-off. The mobile sticky ATC bar (<1024px) is unaffected. */
+
+  /* Hide the empty Judge.me preview badge until the first review lands. The
+     full review widget at the bottom of the page (#judgeme_product_reviews)
+     stays visible so customers can still write reviews. Remove this rule once
+     you have ~5 real reviews. */
+  #judgeme_product_reviews_preview { display: none !important; }
+
+  /* CRITICAL JM modal show fix (v18.2 2026-05-27):
+     Judge.me's CSS sets .jdgm-write-review-modal__page + __section to
+     `visibility: hidden; opacity: 0` with a 0.8s transition. JM only
+     transitions them in via its own user-event-driven pipeline; when we
+     call setup() programmatically the pages stay hidden (blank modal).
+     SCOPED FIX: only force-show the FIRST page (review-form-intro) and
+     the review-form-intro section. The other pages (review-details,
+     about-you, share-media) stay hidden until JM's slider transitions
+     to them, otherwise all 4 pages render simultaneously and overlap. */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__section--review-form-intro,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__page--review-form-intro {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  /* ===== JM modal brand polish (v18.2 2026-05-27) =====
+     Override JM's stock CSS so the Write-a-Review modal feels like part
+     of the SnagNest site, not a Judge.me default popup. */
+  /* Container: rounded corners, soft shadow, brand fonts */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__content,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__container {
+    border-radius: 20px !important;
+    font-family: var(--font-body) !important;
+    box-shadow: 0 14px 40px rgba(31, 41, 55, 0.18), 0 2px 6px rgba(31, 41, 55, 0.08) !important;
+  }
+  /* Title: Fraunces serif, dark text */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__title {
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    color: var(--color-text) !important;
+    letter-spacing: -0.01em !important;
+  }
+  /* Intro / subtitle */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__intro,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__subtitle {
+    font-family: var(--font-body) !important;
+    color: rgba(31, 41, 55, 0.78) !important;
+  }
+  /* Product title — Fraunces, semi-bold */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__product-title {
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    color: var(--color-text) !important;
+  }
+  /* Close X: 44x44 tap target, hover circle */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__close-btn {
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    color: var(--color-text) !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+  }
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__close-btn:hover,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__close-btn:focus-visible {
+    background: var(--color-cream) !important;
+    outline: none !important;
+  }
+  /* Star rating: brand orange. Stars are actually <a class="jdgm-star">
+     elements inside .jdgm-write-review-modal__stars, not <button>s. */
+  html body .jdgm-write-review-modal .jdgm-star,
+  html body .jdgm-write-review-modal .jdgm-star.jdgm--on,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__stars a {
+    color: var(--color-primary) !important;
+    fill: var(--color-primary) !important;
+    transition: transform 0.12s ease !important;
+  }
+  html body .jdgm-write-review-modal .jdgm-star.jdgm--off {
+    color: rgba(232, 118, 90, 0.28) !important;
+    fill: rgba(232, 118, 90, 0.28) !important;
+  }
+  html body .jdgm-write-review-modal .jdgm-star:hover,
+  html body .jdgm-write-review-modal .jdgm-star:focus,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__stars a:hover {
+    transform: scale(1.08) !important;
+    color: var(--color-primary) !important;
+    fill: var(--color-primary) !important;
+  }
+  /* Form inputs: site's contact-form style */
+  html body .jdgm-write-review-modal input[type="text"],
+  html body .jdgm-write-review-modal input[type="email"],
+  html body .jdgm-write-review-modal textarea {
+    font-family: var(--font-body) !important;
+    font-size: 1rem !important;
+    padding: 0.85rem 1rem !important;
+    border: 1px solid rgba(31, 41, 55, 0.18) !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    color: var(--color-text) !important;
+    transition: border-color 0.15s, box-shadow 0.15s !important;
+  }
+  html body .jdgm-write-review-modal input:focus,
+  html body .jdgm-write-review-modal textarea:focus {
+    outline: none !important;
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(232, 118, 90, 0.18) !important;
+  }
+  /* Labels */
+  html body .jdgm-write-review-modal label {
+    font-family: var(--font-body) !important;
+    font-weight: 600 !important;
+    color: var(--color-text) !important;
+    font-size: 0.92rem !important;
+  }
+  /* Primary "Next" / Submit / Close buttons — match site .btn-primary.
+     Actual JM class names: __nav-btn-next, __nav-btn-back, __nav-btn-close. */
+  html body .jdgm-write-review-modal button[type="submit"],
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__nav-btn-next,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__nav-btn-close {
+    background: var(--color-primary) !important;
+    color: var(--color-text) !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    padding: 0.85rem 1.8rem !important;
+    border-radius: 999px !important;
+    border: none !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.01em !important;
+    cursor: pointer !important;
+    min-height: 44px !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+  html body .jdgm-write-review-modal button[type="submit"]:hover,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__nav-btn-next:hover,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__nav-btn-close:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 8px 18px rgba(232, 118, 90, 0.3) !important;
+  }
+  /* Back / secondary text link */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__nav-btn-back,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__skip-btn {
+    color: rgba(31, 41, 55, 0.78) !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.92rem !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    min-height: 44px !important;
+    padding: 0.6rem 0.85rem !important;
+  }
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__nav-btn-back:hover,
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__skip-btn:hover {
+    color: var(--color-primary) !important;
+  }
+  /* "Poor / Great" star-rating labels */
+  html body .jdgm-write-review-modal .jdgm-write-review-modal__stars-label {
+    font-family: var(--font-body) !important;
+    color: rgba(31, 41, 55, 0.78) !important;
+    font-size: 0.85rem !important;
+  }
+  /* Mobile: tighten padding */
+  @media (max-width: 600px) {
+    html body .jdgm-write-review-modal .jdgm-write-review-modal__container {
+      border-radius: 16px !important;
+    }
+    html body .jdgm-write-review-modal .jdgm-write-review-modal__title {
+      font-size: 1.4rem !important;
+    }
+  }
+
+  /* ===== JM REVIEW WIDGET brand polish (v18.3 2026-05-27) =====
+     Restyle the entire .jdgm-rev-widg (the list of reviews + summary at
+     the bottom of the PDP) to match the SnagNest aesthetic so it
+     reads as part of the site, not an embedded JM widget. Active once
+     real reviews land — pre-launch the widget is empty + hidden. */
+
+  /* Widget container — light card on cream */
+  html body #judgeme_product_reviews .jdgm-rev-widg,
+  html body #judgeme_product_reviews .jdgm-rev-widg__reviews {
+    font-family: var(--font-body) !important;
+    color: var(--color-text) !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* Widget summary — top section with overall rating */
+  html body #judgeme_product_reviews .jdgm-rev-widg__summary {
+    background: #fff !important;
+    border: 1px solid rgba(31, 41, 55, 0.06) !important;
+    border-radius: 18px !important;
+    padding: 1.8rem !important;
+    box-shadow: 0 4px 14px rgba(31, 41, 55, 0.05) !important;
+    margin-bottom: 1.5rem !important;
+  }
+  html body #judgeme_product_reviews .jdgm-rev-widg__title,
+  html body #judgeme_product_reviews .jdgm-rev-widg__summary-text {
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    color: var(--color-text) !important;
+  }
+  html body #judgeme_product_reviews .jdgm-rev-widg__summary-stars,
+  html body #judgeme_product_reviews .jdgm-rev-widg__summary-average {
+    color: var(--color-primary) !important;
+  }
+
+  /* Stars (filled / half / empty) — brand orange instead of JM teal */
+  html body #judgeme_product_reviews .jdgm-star,
+  html body #judgeme_product_reviews .jdgm-star.jdgm--on,
+  html body .jdgm-all-reviews-rating .jdgm-star.jdgm--on {
+    color: var(--color-primary) !important;
+  }
+  html body #judgeme_product_reviews .jdgm-star.jdgm--off,
+  html body .jdgm-all-reviews-rating .jdgm-star.jdgm--off {
+    color: rgba(232, 118, 90, 0.25) !important;
+  }
+
+  /* Sort dropdown + filter pills */
+  html body #judgeme_product_reviews select,
+  html body #judgeme_product_reviews .jdgm-rev-widg__sort-dropdown {
+    font-family: var(--font-body) !important;
+    border: 1px solid rgba(31, 41, 55, 0.18) !important;
+    border-radius: 12px !important;
+    padding: 0.6rem 0.85rem !important;
+    background: #fff !important;
+    color: var(--color-text) !important;
+    font-size: 0.92rem !important;
+  }
+
+  /* Individual review card */
+  html body #judgeme_product_reviews .jdgm-rev {
+    background: #fff !important;
+    border: 1px solid rgba(31, 41, 55, 0.06) !important;
+    border-radius: 16px !important;
+    padding: 1.5rem 1.6rem !important;
+    margin-bottom: 1rem !important;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, 0.04) !important;
+  }
+  /* Review header (rating + name) */
+  html body #judgeme_product_reviews .jdgm-rev__header,
+  html body #judgeme_product_reviews .jdgm-rev__rating {
+    margin-bottom: 0.4rem !important;
+  }
+  html body #judgeme_product_reviews .jdgm-rev__author,
+  html body #judgeme_product_reviews .jdgm-rev__reviewer-name {
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    color: var(--color-text) !important;
+    font-size: 1rem !important;
+  }
+  html body #judgeme_product_reviews .jdgm-rev__timestamp,
+  html body #judgeme_product_reviews .jdgm-rev__location {
+    font-family: var(--font-body) !important;
+    color: rgba(31, 41, 55, 0.6) !important;
+    font-size: 0.82rem !important;
+  }
+  /* Verified-buyer badge — small pill */
+  html body #judgeme_product_reviews .jdgm-rev__verified-badge,
+  html body #judgeme_product_reviews .jdgm-rev__buyer-badge {
+    background: rgba(95, 180, 184, 0.14) !important;
+    color: var(--color-secondary) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.04em !important;
+    padding: 0.2rem 0.6rem !important;
+    border-radius: 999px !important;
+    text-transform: uppercase !important;
+  }
+  /* Review title (e.g. "Worked great") */
+  html body #judgeme_product_reviews .jdgm-rev__title {
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    color: var(--color-text) !important;
+    font-size: 1.15rem !important;
+    margin: 0.5rem 0 0.4rem !important;
+  }
+  /* Review body */
+  html body #judgeme_product_reviews .jdgm-rev__body,
+  html body #judgeme_product_reviews .jdgm-rev__body p {
+    font-family: var(--font-body) !important;
+    color: rgba(31, 41, 55, 0.85) !important;
+    line-height: 1.6 !important;
+    font-size: 0.98rem !important;
+  }
+  /* "Was this helpful?" + Reply links */
+  html body #judgeme_product_reviews .jdgm-rev__actions,
+  html body #judgeme_product_reviews .jdgm-rev__reply {
+    font-family: var(--font-body) !important;
+    color: rgba(31, 41, 55, 0.65) !important;
+    font-size: 0.85rem !important;
+  }
+  /* Shop owner reply card — slightly different bg to distinguish */
+  html body #judgeme_product_reviews .jdgm-rev__reply,
+  html body #judgeme_product_reviews .jdgm-rev__shop-owner-reply {
+    background: var(--color-cream) !important;
+    border-left: 3px solid var(--color-primary) !important;
+    border-radius: 8px !important;
+    padding: 0.85rem 1.1rem !important;
+    margin-top: 0.85rem !important;
+  }
+  /* Pagination buttons */
+  html body #judgeme_product_reviews .jdgm-paginate {
+    margin-top: 1.5rem !important;
+    display: flex !important;
+    gap: 0.4rem !important;
+    justify-content: center !important;
+  }
+  html body #judgeme_product_reviews .jdgm-paginate .jdgm-paginate__page,
+  html body #judgeme_product_reviews .jdgm-paginate__page {
+    font-family: var(--font-body) !important;
+    font-weight: 600 !important;
+    color: var(--color-text) !important;
+    background: #fff !important;
+    border: 1px solid rgba(31, 41, 55, 0.12) !important;
+    border-radius: 999px !important;
+    padding: 0.5rem 0.9rem !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    text-decoration: none !important;
+    transition: background 0.15s, border-color 0.15s !important;
+  }
+  html body #judgeme_product_reviews .jdgm-paginate__page:hover {
+    border-color: var(--color-primary) !important;
+    color: var(--color-primary) !important;
+  }
+  html body #judgeme_product_reviews .jdgm-paginate__page.jdgm-paginate__current-page {
+    background: var(--color-primary) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-primary) !important;
+  }
+
+  /* Histogram bars (5★ 4★ 3★ counts in summary) */
+  html body #judgeme_product_reviews .jdgm-histogram__bar-content,
+  html body #judgeme_product_reviews .jdgm-histogram__bar {
+    background: rgba(232, 118, 90, 0.18) !important;
+    border-radius: 4px !important;
+  }
+  html body #judgeme_product_reviews .jdgm-histogram__bar-content--filled,
+  html body #judgeme_product_reviews .jdgm-histogram__bar-content-active {
+    background: var(--color-primary) !important;
+  }
+
+  /* Mobile: tighten review-card padding */
+  @media (max-width: 600px) {
+    html body #judgeme_product_reviews .jdgm-rev { padding: 1.2rem 1.1rem !important; border-radius: 12px !important; }
+    html body #judgeme_product_reviews .jdgm-rev-widg__summary { padding: 1.3rem !important; border-radius: 14px !important; }
+  }
+
+  /* ===== v18 Customer Reviews section header =====
+     Two-column header: eyebrow + heading + empty-state-or-summary on the left,
+     Write-a-review button on the right. Mobile stacks them. The Judge.me stock
+     widgets are kept in the DOM so the JM script can auto-bind them and so
+     SEO crawls real review markup once reviews land — but we hide the bare/
+     empty Judge.me widgets via CSS so a 0-review page doesn't show ugly empty
+     colored boxes. */
+  .ms-reviews-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1.5px solid rgba(31,41,55,0.1);
+  }
+  .ms-reviews-header-text { flex: 1; min-width: 240px; }
+  .ms-reviews-header-action {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+  .ms-reviews-eyebrow {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-secondary);
+    margin: 0 0 0.4rem;
+  }
+  .ms-reviews-heading {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1.15;
+    margin: 0 0 0.65rem;
+    color: var(--color-text);
+  }
+  .ms-reviews-heading em {
+    color: var(--color-primary);
+    font-style: italic;
+  }
+  .ms-reviews-meta {
+    margin: 0;
+    font-size: 0.92rem;
+    color: rgba(31,41,55,0.78);
+    line-height: 1.5;
+    max-width: 520px;
+  }
+  .ms-reviews-meta-empty { font-style: italic; }
+  .ms-reviews-stars {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    margin-right: 0.5rem;
+    vertical-align: -1px;
+  }
+  .ms-reviews-meta-text {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  .ms-write-review-btn {
+    padding: 0.85rem 1.6rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  /* Hide Judge.me's stock write-rev-link box inside our section-header
+     container. JM styles its empty container as a solid teal block — ugly
+     when there's no content inside. We use our own .ms-write-review-btn.
+     LOCK: must use display:none (not visibility/opacity) so the container
+     stays out of focus order. Scoped to the header container only —
+     a :empty fallback was removed because JM injects a child <a> tag
+     into the container during loader.js hydration, which makes :empty
+     stop matching even before reviews exist. */
+  .ms-reviews-header-action .jdgm-write-rev-link { display: none !important; }
+
+  /* Hide the empty-state meta line once Judge.me hydrates with real content
+     (handled by JS adding [data-ms-reviews-hydrated] to the header). */
+  .ms-reviews-header[data-ms-reviews-hydrated="true"] .ms-reviews-meta-empty { display: none; }
+
+  /* Hide the all-reviews-rating widget while empty. Once JM populates it (5
+     stars + count), the empty:has() trick releases and lets it render. The
+     widget then renders BELOW the section header (separate row). */
+  .ms-jdgm-rating { display: none; }
+  .ms-jdgm-rating.jdgm--done-setup:has(.jdgm-rev-widg-summary),
+  .ms-jdgm-rating.jdgm--done-setup .jdgm-prev-badge[data-average-rating]:not([data-average-rating="0.00"]) {
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Mobile: stack header items vertically, button full-width. */
+  @media (max-width: 767px) {
+    .ms-reviews-header { flex-direction: column; align-items: stretch; }
+    .ms-reviews-header-action { align-items: stretch; }
+    .ms-write-review-btn { width: 100%; }
+    .ms-reviews-heading { font-size: 1.6rem; }
+  }
+
+  /* v18 mobile-port pass: WCAG/HIG-compliant 44px minimum tap targets on
+     PDP variant + qty controls. Default theme.css ships them sub-44px
+     (option-value ~32px tall, qty button 40px wide). These override at
+     all viewport widths so desktop also benefits. */
+  .product-quantity .qty-control button { min-width: 44px; min-height: 44px; }
+  .option-values .option-value { min-height: 44px; padding: 0.75rem 1.2rem; }
+  /* Hero badge: prevent horizontal page-scroll on small viewports. The
+     default .hero-badge sits at left:-20px which pushes 20px past the
+     container edge — fine at desktop, causes whole-page horizontal
+     scroll on 375px. Pin it inside the container on mobile. */
+  @media (max-width: 600px) {
+    .hero-badge { left: 0 !important; width: 110px !important; bottom: -16px !important; }
+    .hero { overflow-x: clip; }
+  }
+
+  /* Bundle "What's inside" — force uniform thumbnail size + alignment.
+     Without these overrides, image cells render at ~142px but paw-fallback
+     cells shrink to ~93px, so a row of mixed items looks ragged. We pin
+     the thumb to a square with aspect-ratio, center contents, and have
+     the fallback fill the cell. The grid itself uses equal columns so
+     captions line up under the thumbs. */
+  .product-bundle-contents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .product-bundle-contents-grid > li { display: flex; }
+  .product-bundle-contents-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(31, 41, 55, 0.04);
+  }
+  .product-bundle-contents-fallback-style {} /* sentinel for v19 patch below */
+  .product-bundle-contents-fallback {
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    color: var(--color-secondary) !important;
+    background: linear-gradient(135deg, rgba(95,180,184,0.10), rgba(232,118,90,0.08)) !important;
+    letter-spacing: 0.02em;
+    border-radius: inherit;
+  }
+  .product-bundle-contents-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .product-bundle-contents-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 2rem;
+    opacity: 0.45;
+  }
+  .product-bundle-contents-title {
+    display: block;
+    text-align: center;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    margin-top: 0.4rem;
+  }
+  .product-bundle-contents-link {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+    border-radius: 12px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .product-bundle-contents-link:hover { transform: translateY(-2px); }
+  .product-bundle-contents-link:hover .product-bundle-contents-title { color: var(--color-primary); text-decoration: underline; text-underline-offset: 2px; }
+  .product-bundle-contents-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+  /* Self-link guard: when the bundle contains the product the user is
+     already viewing, render as a non-interactive span instead of an anchor.
+     Visually de-emphasize so the user understands it's the current page. */
+  .product-bundle-contents-link.is-current {
+    cursor: default;
+    opacity: 0.7;
+  }
+  .product-bundle-contents-link.is-current:hover { transform: none; }
+  .product-bundle-contents-link.is-current .product-bundle-contents-title { color: inherit; text-decoration: none; }
+</style>
+
+<script>
+  // Lightbox / thumbnail sync: when the user clicks a thumbnail, the main
+  // image src swaps via theme.js's initProductGallery, but the lightbox
+  // attribute on the wrapper stayed pinned to the FEATURED image — so
+  // clicking the enlarged view always opened image #1. Mirror the swap
+  // onto the wrapper here so the lightbox opens the currently-shown image.
+  (function () {
+    var thumbs = document.querySelectorAll('[data-product-thumb]');
+    var main = document.querySelector('[data-product-main-img]');
+    var wrapper = main && main.closest('[data-lightbox]');
+    if (!thumbs.length || !main || !wrapper) return;
+    thumbs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        var hires = t.getAttribute('data-img-large') || t.getAttribute('data-img');
+        if (hires) wrapper.setAttribute('data-lightbox', hires);
+      });
+    });
+  })();
+
+  (function () {
+    // Hydration race guard: server-side metafield branch decides the empty
+    // state, but Judge.me hydrates client-side. If metafields lag the actual
+    // review data (common right after the first review lands), the page would
+    // claim "No reviews yet" next to a populated star widget below. When JM
+    // signals it's done rendering AND the rating widget reports a non-zero
+    // average, flip the header into hydrated mode so the empty line hides.
+    var header = document.querySelector('.ms-reviews-header');
+    if (!header) return;
+    function checkHydrated() {
+      // Primary signal: jdgm-prev-badge data-average-rating / data-number-of-reviews
+      var badge = document.querySelector('.jdgm-prev-badge[data-average-rating], .jdgm-all-reviews-rating .jdgm-prev-badge[data-average-rating]');
+      var avg = badge && parseFloat(badge.getAttribute('data-average-rating'));
+      var ct = badge && parseInt(badge.getAttribute('data-number-of-reviews'), 10);
+      if ((avg && avg > 0) || (ct && ct > 0)) {
+        header.setAttribute('data-ms-reviews-hydrated', 'true');
+        return true;
+      }
+      // Fallback: any rendered review item or summary widget content with non-zero rating
+      var hasReviewRow = document.querySelector('#judgeme_product_reviews .jdgm-rev, .jdgm-rev-widg__reviews .jdgm-rev');
+      var summary = document.querySelector('.jdgm-rev-widg-summary, .jdgm-rev-widg__summary');
+      if (hasReviewRow || (summary && summary.textContent && /[1-9]/.test(summary.textContent))) {
+        header.setAttribute('data-ms-reviews-hydrated', 'true');
+        return true;
+      }
+      return false;
+    }
+    // Try once on DOM ready, then poll a few times in case JM is slow.
+    if (!checkHydrated()) {
+      var tries = 0;
+      var iv = setInterval(function () {
+        tries++;
+        if (checkHydrated() || tries > 20) clearInterval(iv);
+      }, 500);
+    }
+    document.addEventListener('jdgm.ready', checkHydrated);
+  })();
+
+  (function () {
+    // v18 "Write a review" button → opens Judge.me's submit-review modal.
+    //
+    // How it works in 2 steps:
+    //  1. .click() on the matching .jdgm-write-rev-link[data-id="<pid>"]
+    //     triggers JM's loader.js delegated listener, which builds the
+    //     modal DOM and appends it to <body> (display:none initially).
+    //  2. JM's own listener also sets display:block — BUT only on trusted
+    //     user clicks (event.isTrusted === true). A synthetic .click() from
+    //     JS hits the build path but skips the show path. So we MutationObserve
+    //     <body> for the modal's appearance and flip display:block ourselves.
+    //
+    // _WriteReviewModal.setup() invoked directly throws because the
+    // jQuery .urlParam extension isn't loaded by this shop's JM bundle —
+    // we route around that by reusing JM's binding.
+    var btnSelector = '[data-ms-write-review]';
+    var clickPending = false;  // anti-rapid-fire guard for cold-load window
+    var clickHandler = function (e) {
+      var btn = e.target && e.target.closest && e.target.closest(btnSelector);
+      if (!btn) return;
+      e.preventDefault();
+      // Drop subsequent clicks while a previous click is still resolving
+      // (either polling for JM to load or waiting for modal to appear).
+      // Without this, rapid double-tap can stack 2+ setInterval polls and
+      // fire jmLink.click() multiple times once JM hydrates.
+      if (clickPending) return;
+      clickPending = true;
+      var pid = btn.getAttribute('data-product-id');
+      // Only scroll if we're NOT already inside the reviews section — avoids
+      // yanking the user away after they've already navigated there.
+      var section = document.getElementById('ms-reviews-section');
+      if (section && !section.contains(btn)) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      // Double-click idempotency: if a modal already exists AND is VISIBLE,
+      // don't construct a second one — JM's setup() appends to <body>
+      // every call. Rapid double-clicks would otherwise stack modals.
+      //
+      // CRITICAL: must check visibility, not just existence. JM's loader.js
+      // pre-builds the modal template at page load in display:none state.
+      // An earlier version bailed on any modal in DOM — silently failing
+      // every user click because the prebuilt-hidden modal always exists.
+      var existingModal = document.querySelector('.jdgm-write-review-modal');
+      if (existingModal && getComputedStyle(existingModal).display !== 'none') return;
+      // Try the official JM path first: build a real _WriteReviewModal
+      // and call setup(). This populates the form content (rating stars,
+      // name/email fields, etc.) — the path that just .click()'ing the
+      // widget skips. JM's setup() needs a jQuery .urlParam extension
+      // which this shop's bundle doesn't ship, so we polyfill it once.
+      var openedViaSetup = false;
+      try {
+        if (window.jdgm && window.jdgm.$ && window.jdgm.$.fn) {
+          if (typeof window.jdgm.$.fn.urlParam !== 'function') {
+            // Escape regex meta in the param name in case a future JM
+            // bundle ever passes user-influenced input. Today JM only
+            // calls this with literal strings, but it's cheap defense.
+            window.jdgm.$.fn.urlParam = function (name) {
+              var safe = String(name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              var match = new RegExp('[?&]' + safe + '=([^&#]*)').exec(window.location.href);
+              return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
+            };
+            // Surface the polyfill in DevTools so a future maintainer
+            // notices we're filling a gap in JM's bundle. If a real JM
+            // urlParam ships later with a different signature, this
+            // log is the breadcrumb that explains why something broke.
+            if (window.console && console.info) {
+              console.info('[ms] polyfilled jdgm.$.fn.urlParam (missing from this shop\'s JM bundle)');
+            }
+          }
+          var $jmLink = window.jdgm.$('.jdgm-write-rev-link[data-id="' + pid + '"]').first();
+          if ($jmLink.length && typeof window.jdgm._WriteReviewModal === 'function') {
+            var modal = new window.jdgm._WriteReviewModal($jmLink);
+            modal.setup();
+            // CRITICAL: setup() builds the modal DOM but JM's natural show
+            // path (which adds display:block) only fires for trusted user
+            // clicks on .jdgm-write-rev-link itself. When we call setup()
+            // directly, we must force the modal visible ourselves. Use an
+            // interval (not single setTimeout) because JM may keep
+            // re-applying display:none for a few frames during its own
+            // setup teardown. Cap at 2 seconds.
+            var showShots = 0;
+            var showSetupModal = setInterval(function () {
+              showShots++;
+              var modalEl = document.querySelector('.jdgm-write-review-modal');
+              if (modalEl) {
+                modalEl.style.setProperty('display', 'block', 'important');
+                if (getComputedStyle(modalEl).display === 'block' && showShots > 4) {
+                  clearInterval(showSetupModal);
+                  clickPending = false;
+                }
+              }
+              if (showShots >= 40) { clearInterval(showSetupModal); clickPending = false; }
+            }, 50);
+            openedViaSetup = true;
+          }
+        }
+      } catch (err) { /* fall through to .click() path below */ }
+      if (openedViaSetup) {
+        // Modal built via JM's official path + force-show interval running.
+        // clickPending gets cleared inside the showSetupModal interval.
+        return;
+      }
+      // Fallback: find the JM write-rev-link scoped to THIS product's id
+      // and .click() it. JM's loader.js binds a delegated listener that
+      // builds the modal — but on programmatic (non-trusted) clicks the
+      // show step doesn't fire, so we force display:block until JM stops
+      // resetting it. Caps at 1.5s.
+      //
+      // Cold-load retry: if Judge.me's loader.js hasn't hydrated yet,
+      // window.jdgm may exist but .jdgm-write-rev-link[data-id] may not
+      // be queryable as expected (or JM hasn't bound its delegated
+      // listener yet). Poll up to 4s for the widget to appear AND for
+      // JM's binding to be active, then click. This addresses the
+      // "click does nothing" case when a user lands on the page and
+      // hits the button before JM finishes loading.
+      var coldAttempts = 0;
+      var pollLink = setInterval(function () {
+        coldAttempts++;
+        var jmLink = document.querySelector('.jdgm-write-rev-link[data-id="' + pid + '"]');
+        var jmReady = window.jdgm && typeof window.jdgm._WriteReviewModal === 'function';
+        if (jmLink && jmReady) {
+          clearInterval(pollLink);
+          try { jmLink.click(); } catch (_) {}
+          // Then force display:block until JM stops resetting (1.5s cap).
+          var showAttempts = 0;
+          var showInterval = setInterval(function () {
+            showAttempts++;
+            var modalEl = document.querySelector('.jdgm-write-review-modal');
+            if (modalEl) {
+              modalEl.style.setProperty('display', 'block', 'important');
+              if (getComputedStyle(modalEl).display === 'block' && showAttempts > 3) {
+                clearInterval(showInterval);
+                clickPending = false;
+              }
+            }
+            if (showAttempts >= 30) { clearInterval(showInterval); clickPending = false; }
+          }, 50);
+        }
+        if (coldAttempts >= 40) {
+          clearInterval(pollLink);
+          // Last-resort: visible feedback to the user that something's
+          // wrong rather than a silent no-op. Toast briefly + scroll to
+          // the JM widget area so they at least see review content.
+          var toast = document.querySelector('[data-app-toast]');
+          if (toast) {
+            toast.textContent = 'Reviews are still loading. Try again in a moment.';
+            toast.classList.add('is-visible');
+            setTimeout(function () { toast.classList.remove('is-visible'); }, 3500);
+          }
+          clickPending = false;
+        }
+      }, 100);
+      // Belt-and-suspenders: also clear pending after 5s to recover from
+      // any path that fails to clear it explicitly.
+      setTimeout(function () { clickPending = false; }, 5000);
+    };
+    document.addEventListener('click', clickHandler);
+    // Theme-editor / section reload teardown so we don't stack listeners.
+    document.addEventListener('shopify:section:unload', function handler(ev) {
+      var sec = document.getElementById('ms-reviews-section');
+      if (sec && ev.target && ev.target.contains(sec)) {
+        document.removeEventListener('click', clickHandler);
+        document.removeEventListener('shopify:section:unload', handler);
+      }
+    });
+  })();
+
+  (function () {
+    var bar = document.querySelector('[data-product-sticky-atc]');
+    var primary = document.querySelector('[data-product-atc-primary]');
+    if (!bar || !primary || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      var btn = bar.querySelector('[data-product-sticky-atc-btn]');
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          bar.classList.remove('is-visible');
+          bar.setAttribute('aria-hidden', 'true');
+          bar.setAttribute('inert', '');
+          if (btn) btn.setAttribute('tabindex', '-1');
+        } else {
+          bar.classList.add('is-visible');
+          bar.setAttribute('aria-hidden', 'false');
+          bar.removeAttribute('inert');
+          if (btn) btn.removeAttribute('tabindex');
+        }
+      });
+    }, { rootMargin: '0px 0px -40px 0px', threshold: 0 });
+    io.observe(primary);
+    // Tear down on Shopify theme-editor section reload so we don't leak observers.
+    document.addEventListener('shopify:section:unload', function handler(ev) {
+      if (ev.target && ev.target.contains(bar)) {
+        io.disconnect();
+        document.removeEventListener('shopify:section:unload', handler);
+      }
+    });
+  })();
+</script>
+
+<section class="section" id="ms-reviews-section" aria-labelledby="ms-reviews-heading">
+  <div class="container">
+    {%- comment -%}
+      Judge.me integration. The app's loader.js auto-binds the jdgm-* widgets
+      below by data-id. Empty Judge.me widgets render as ugly colored boxes —
+      we CSS-hide them while empty so the pre-launch empty state looks clean,
+      and use our own copy + button for the empty state. Once reviews land,
+      Judge.me populates the widgets and we let them render.
+    {%- endcomment -%}
+    {%- assign has_legacy = false -%}
+    {%- if product.metafields.judgeme.widget != blank -%}
+      {%- assign has_legacy = true -%}
+    {%- endif -%}
+
+    {%- assign jdgm_rating_section = product.metafields.judgeme.rating | default: 0 | times: 1 -%}
+    {%- assign jdgm_count_section = product.metafields.judgeme.review_count | default: 0 | plus: 0 -%}
+    {%- comment -%} Star rendering: filled vs empty stars from the real rating. {%- endcomment -%}
+    {%- assign jdgm_section_full = jdgm_rating_section | round -%}
+    {%- if jdgm_section_full > 5 -%}{%- assign jdgm_section_full = 5 -%}{%- endif -%}
+    {%- if jdgm_section_full < 0 -%}{%- assign jdgm_section_full = 0 -%}{%- endif -%}
+    {%- assign jdgm_section_empty = 5 | minus: jdgm_section_full -%}
+    {%- capture jdgm_section_stars -%}{% for i in (1..jdgm_section_full) %}★{% endfor %}{% for i in (1..jdgm_section_empty) %}☆{% endfor %}{%- endcapture -%}
+
+    <div class="ms-reviews-header">
+      <div class="ms-reviews-header-text">
+        <p class="ms-reviews-eyebrow">From our customers</p>
+        <h2 class="ms-reviews-heading" id="ms-reviews-heading">Customer <em>reviews</em></h2>
+        {%- comment -%} OR not AND: handles edge where JM has count synced but rating still 0 (or vice-versa) during initial review processing. {%- endcomment -%}
+        {%- if jdgm_count_section > 0 or jdgm_rating_section > 0 -%}
+          <p class="ms-reviews-meta">
+            <span class="ms-reviews-stars" aria-label="{{ jdgm_rating_section }} out of 5 stars">{{ jdgm_section_stars }}</span>
+            <span class="ms-reviews-meta-text">{{ jdgm_rating_section }} · {{ jdgm_count_section }} verified {% if jdgm_count_section == 1 %}review{% else %}reviews{% endif %}</span>
+          </p>
+        {%- else -%}
+          <p class="ms-reviews-meta ms-reviews-meta-empty" data-ms-empty-state>No reviews yet. If you've tried this product, your honest take helps the next shopper decide.</p>
+        {%- endif -%}
+      </div>
+      <div class="ms-reviews-header-action">
+        {%- comment -%} Judge.me's own write-rev-link widget — kept in DOM for SEO + auto-bind, hidden via CSS while empty so the bare teal block doesn't render. {%- endcomment -%}
+        <div class="jdgm-widget jdgm-write-rev-link" data-id="{{ product.id }}"></div>
+        <button type="button" class="btn btn-primary ms-write-review-btn" aria-label="Write a review for {{ product.title | escape }}" data-ms-write-review data-product-id="{{ product.id }}">Write a review</button>
+      </div>
+    </div>
+
+    {%- comment -%} jdgm-all-reviews-rating — invisible until JM populates real content. {%- endcomment -%}
+    <div class="jdgm-widget jdgm-all-reviews-rating ms-jdgm-rating" data-id="{{ product.id }}"></div>
+
+    <div style='clear:both'></div>
+    <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget {% if has_legacy %}jdgm--done-rendering{% endif %}' data-id='{{ product.id }}'>
+      {% if has_legacy %}
+        {{ product.metafields.judgeme.widget }}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{%- comment -%} Count available cross-sells once so we can suppress the whole section if there are none — no orphan "You'll also love" header. {%- endcomment -%}
+{%- assign available_total = 0 -%}
+{%- for prod in collections.all.products -%}
+  {%- if prod.id != product.id and prod.available -%}
+    {%- assign available_total = available_total | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if available_total > 0 -%}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">You'll also love</span>
+      <h2>More <em>trending finds</em></h2>
+    </div>
+    <div class="products-grid">
+      {%- comment -%}
+        v18 (2026-05-26): rotate the "You'll also love" starting index by
+        product.id so different PDPs surface different cross-sells instead of
+        the same 4 products everywhere. Two-pass: skip the first <offset> items
+        that pass the filter, then render the next 4.
+      {%- endcomment -%}
+      {%- assign related_offset = 0 -%}
+      {%- if available_total > 4 -%}
+        {%- assign related_offset = product.id | modulo: available_total -%}
+      {%- endif -%}
+      {%- assign skipped = 0 -%}
+      {%- assign related_count = 0 -%}
+      {%- for prod in collections.all.products -%}
+        {%- if prod.id != product.id and prod.available -%}
+          {%- if skipped < related_offset -%}
+            {%- assign skipped = skipped | plus: 1 -%}
+          {%- elsif related_count < 4 -%}
+            {% render 'product-card', product: prod %}
+            {%- assign related_count = related_count | plus: 1 -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- comment -%}
+        Wrap-around: only fires when the offset pushed us past the end of the
+        list AND there are MORE than 4 available products total. If
+        available_total <= 4 the first pass already rendered everything (with
+        offset=0), so a second pass would just duplicate the first.
+      {%- endcomment -%}
+      {%- if related_count < 4 and available_total > 4 -%}
+        {%- assign wrap_seen = 0 -%}
+        {%- for prod in collections.all.products -%}
+          {%- if prod.id != product.id and prod.available and related_count < 4 -%}
+            {%- if wrap_seen < related_offset -%}
+              {%- comment -%} Only render items BEFORE the original offset (which weren't rendered in pass 1). {%- endcomment -%}
+              {% render 'product-card', product: prod %}
+              {%- assign related_count = related_count | plus: 1 -%}
+              {%- assign wrap_seen = wrap_seen | plus: 1 -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+{%- comment -%}
+  v18 (2026-05-26): Judge.me review widget at the bottom is visible so customers
+  can write reviews. The preview badge near the buy-box is hidden via CSS in the
+  inline style block above (#judgeme_product_reviews_preview) — see comment
+  there. Both flip back on naturally once you have ~5 real reviews.
+{%- endcomment -%}
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": []
+}
+{% endschema %}

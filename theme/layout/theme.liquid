@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="{{ settings.color_primary }}">
+    <meta name="facebook-domain-verification" content="x9eexjo5vxb0sdxb5mqe8kgvatsyam" />
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    {%- unless settings.heading_font.system? and settings.body_font.system? -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+      {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+      {%- unless template == 'index' or page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {% if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- elsif template == 'index' and shop.description != blank -%}
+      <meta name="description" content="{{ shop.description | escape }}">
+    {%- elsif template == 'index' -%}
+      <meta name="description" content="Trending, problem-solving products curated by a team that tests before it stocks. Home, kitchen, gadgets, gifts, outdoors, wellness. Trending finds, curated for you.">
+    {% endif %}
+
+    {% render 'meta-tags' %}
+
+    <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
+    {{ content_for_header }}
+
+    {%- liquid
+      assign body_font = settings.body_font
+      assign heading_font = settings.heading_font
+      assign body_font_bold = body_font | font_modify: 'weight', 'bold'
+      assign body_font_italic = body_font | font_modify: 'style', 'italic'
+      assign body_font_bold_italic = body_font_bold | font_modify: 'style', 'italic'
+    -%}
+
+    {% style %}
+      {{ body_font | font_face: font_display: 'swap' }}
+      {{ body_font_bold | font_face: font_display: 'swap' }}
+      {{ body_font_italic | font_face: font_display: 'swap' }}
+      {{ body_font_bold_italic | font_face: font_display: 'swap' }}
+      {{ heading_font | font_face: font_display: 'swap' }}
+
+      :root {
+        --color-primary: {{ settings.color_primary }};
+        --color-secondary: {{ settings.color_secondary }};
+        --color-accent: {{ settings.color_accent }};
+        --color-cream: {{ settings.color_cream }};
+        --color-text: {{ settings.color_text }};
+        --color-bg: {{ settings.color_background }};
+        --color-mint: {{ settings.color_mint }};
+        --font-heading: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+        --font-body: {{ body_font.family }}, {{ body_font.fallback_families }};
+        --font-heading-weight: {{ heading_font.weight }};
+        --shipping-threshold: {{ settings.free_shipping_threshold | default: 50 }};
+      }
+    {% endstyle %}
+
+    <link rel="stylesheet" href="{{ 'theme.css' | asset_url }}">
+    {%- comment -%} v4 patch stylesheet (mobile PDP overflow + page.styled template + minor UX) {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'theme-v4.css' | asset_url }}">
+
+    <script>
+      window.theme = {
+        moneyFormat: {{ shop.money_format | json }},
+        freeShippingThreshold: {{ settings.free_shipping_threshold | default: 50 }},
+        cartUrl: '{{ routes.cart_url }}',
+        routes: {
+          cart_add_url: '{{ routes.cart_add_url }}',
+          cart_change_url: '{{ routes.cart_change_url }}',
+          cart_update_url: '{{ routes.cart_update_url }}',
+          cart_url: '{{ routes.cart_url }}',
+          predictive_search_url: '{{ routes.predictive_search_url }}'
+        },
+        promoEnabled: {{ settings.promo_popup_enabled | default: true }},
+        promoCode: {{ settings.promo_popup_code | default: 'WELCOME10' | json }},
+        promoTitle: {{ settings.promo_popup_title | default: 'Welcome to the Nest' | json }},
+        promoSubtitle: {{ settings.promo_popup_subtitle | default: '10% off your first order over $50' | json }},
+        bundleUpsellEnabled: {{ settings.bundle_upsell_enabled | default: true }}
+      };
+    </script>
+  </head>
+
+  <body class="template-{{ template | replace: '.', '-' | handle }}">
+    <a class="skip-to-content" href="#MainContent">{{ 'accessibility.skip_to_text' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" class="main-content" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {% render 'cart-drawer' %}
+    {% render 'promo-popup' %}
+    {% render 'bundle-upsell-popup' %}
+
+    <div class="app-toast" data-app-toast role="status" aria-live="polite"></div>
+
+    <ul hidden>
+      <li id="a11y-refresh-page-message">{{ 'accessibility.refresh_page' | t }}</li>
+      <li id="a11y-new-window-message">{{ 'accessibility.link_messages.new_window' | t }}</li>
+    </ul>
+
+    {%- comment -%}
+      ============================================================
+      v4 INLINE PATCHES - loaded AFTER theme.js DOMContentLoaded
+      ============================================================
+    {%- endcomment -%}
+    <script>
+    (function() {
+      'use strict';
+      function ready(fn) {
+        if (document.readyState !== 'loading') { setTimeout(fn, 50); }
+        else { document.addEventListener('DOMContentLoaded', function() { setTimeout(fn, 50); }); }
+      }
+      function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+      function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
+
+      function patchVariantPicker() {
+        var form = $('form[action="/cart/add"]');
+        if (!form) return;
+        var variantsScript = $('[data-product-variants]');
+        if (!variantsScript) return;
+        var variants;
+        try { variants = JSON.parse(variantsScript.textContent); } catch (e) { return; }
+        if (!Array.isArray(variants) || variants.length === 0) return;
+        var idInput = form.querySelector('input[name="id"]');
+        var submitBtn = form.querySelector('button[type="submit"]');
+        function getSelected() {
+          var byPos = {};
+          $$('[data-option-value].is-active', form).forEach(function(btn) {
+            var pos = parseInt(btn.getAttribute('data-option-position'), 10);
+            var val = btn.getAttribute('data-value') || btn.textContent.trim();
+            if (pos) byPos[pos] = val;
+          });
+          return byPos;
+        }
+        function findVariant(byPos) {
+          return variants.find(function(v) {
+            if (byPos[1] != null && v.option1 !== byPos[1]) return false;
+            if (byPos[2] != null && v.option2 !== byPos[2]) return false;
+            if (byPos[3] != null && v.option3 !== byPos[3]) return false;
+            return true;
+          });
+        }
+        function fmt(cents) { return '$' + (cents / 100).toFixed(2); }
+        function update() {
+          var selected = getSelected();
+          var variant = findVariant(selected);
+          if (!variant) return;
+          if (idInput) idInput.value = variant.id;
+          $$('[data-option-value].is-active', form).forEach(function(btn) {
+            var group = btn.getAttribute('data-option-group');
+            var display = form.querySelector('[data-option-display="' + group + '"]');
+            if (display) display.textContent = btn.getAttribute('data-value') || btn.textContent.trim();
+          });
+          if (submitBtn) {
+            if (variant.available) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'Add to Cart &middot; ' + fmt(variant.price);
+            } else {
+              submitBtn.disabled = true;
+              submitBtn.innerHTML = 'Sold Out';
+            }
+          }
+        }
+        $$('[data-option-value]', form).forEach(function(el) {
+          el.addEventListener('click', function() { setTimeout(update, 0); });
+        });
+        update();
+      }
+      // v20.4 (2026-05-27): patchCartAutoOpen REMOVED. It auto-opened the cart drawer on every
+      // cart:added event by mutating classes directly, bypassing the v20 focus-trap path in
+      // theme.js. The current theme.js design is "show a toast on add, don't auto-open" - the
+      // patch was a leftover from v4 that contradicted that. Removed so keyboard users get the
+      // proper focus management when they DO open the drawer.
+      function patchCartAutoOpen() { /* removed in v20.4 */ }
+      function patchEmptyShippingBar() {
+        var threshold = (window.theme && window.theme.freeShippingThreshold) || 50;
+        var body = $('[data-cart-body]');
+        var text = $('[data-shipping-text]');
+        var fill = $('[data-shipping-fill]');
+        if (!body || !text) return;
+        var observer = new MutationObserver(function() {
+          if (body.querySelector('.cart-drawer-empty')) {
+            text.innerHTML = 'Spend <strong>$' + threshold.toFixed(2) + '</strong> more for FREE shipping';
+            if (fill) { fill.style.width = '0%'; fill.classList.remove('is-complete'); }
+          }
+        });
+        observer.observe(body, { childList: true, subtree: true });
+      }
+      function patchPromoStartShopping() {
+        var popup = $('[data-promo-popup]');
+        if (!popup) return;
+        var startShoppingLinks = popup.querySelectorAll('a[href="/collections/all"]');
+        startShoppingLinks.forEach(function(link) {
+          link.addEventListener('click', function() {
+            try { localStorage.setItem('msPromoDismissed', '1'); } catch(e) {}
+          });
+        });
+      }
+      ready(function() {
+        try { patchVariantPicker(); } catch(e) {}
+        try { patchCartAutoOpen(); } catch(e) {}
+        try { patchEmptyShippingBar(); } catch(e) {}
+        try { patchPromoStartShopping(); } catch(e) {}
+      });
+    })();
+    </script>
+  </body>
+</html>

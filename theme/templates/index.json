@@ -1,0 +1,59 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": { "type": "hero", "settings": {
+      "heading": "Trending finds, <em>curated for you</em>",
+      "subheading": "We hunt down the clever, problem-solving products worth buying, then put them all in one place so you don't have to dig.",
+      "cta_text": "Shop bestsellers",
+      "cta_link": "/collections/all",
+      "badge_text": "Free U.S. shipping over $50"
+    }},
+    "trust-strip": { "type": "trust-strip", "blocks": {
+      "t1": { "type": "trust", "settings": {"icon": "🚚", "title": "Free shipping $50+", "sub": "Ships from the USA"} },
+      "t2": { "type": "trust", "settings": {"icon": "↩️", "title": "14-day returns", "sub": "See refund policy"} },
+      "t3": { "type": "trust", "settings": {"icon": "🛍️", "title": "Handpicked finds", "sub": "New drops every week"} },
+      "t4": { "type": "trust", "settings": {"icon": "🔒", "title": "Secure checkout", "sub": "Powered by Shopify"} }
+    }, "block_order": ["t1","t2","t3","t4"], "settings": {} },
+    "shop-by-need": { "type": "shop-by-need", "blocks": {
+      "trending": { "type": "tile", "settings": {"title": "Trending Now", "blurb": "What everyone is snagging this week.", "icon": "🛍️", "collection": "trending", "bg_color": "#F3E9D6"} },
+      "solvers": { "type": "tile", "settings": {"title": "Problem Solvers", "blurb": "Clever fixes for everyday annoyances.", "icon": "🔒", "collection": "problem-solvers", "bg_color": "#F6ECDA"} },
+      "home": { "type": "tile", "settings": {"title": "Home & Cozy", "blurb": "Small upgrades for a comfier space.", "icon": "🛏️", "collection": "home-cozy", "bg_color": "#F0DCC0"} },
+      "gifts": { "type": "tile", "settings": {"title": "Gift-Worthy", "blurb": "Easy wins for the people you like.", "icon": "💝", "collection": "gifts", "bg_color": "#FCE8DA"} }
+    }, "block_order": ["trending","solvers","home","gifts"], "settings": {} },
+    "featured": { "type": "featured-collection", "settings": {
+      "eyebrow": "Best Sellers",
+      "heading": "This week's <em>most snagged</em>",
+      "subheading": "The finds our shoppers keep coming back for.",
+      "collection": "best-sellers",
+      "limit": 8,
+      "show_view_all": true
+    }},
+    "bundle-spotlight": { "type": "bundle-spotlight", "blocks": {
+      "desk": { "type": "bundle", "settings": {"product": "desk-reset-bundle", "moment": "Work from home", "blurb": "Three small upgrades that make the workday smoother.", "savings": "Saves $13"} },
+      "kitchen": { "type": "bundle", "settings": {"product": "kitchen-quickwins-bundle", "moment": "Weeknight cooking", "blurb": "Tools that turn dinner from a chore into an easy night.", "savings": "Saves $9"} },
+      "cozy": { "type": "bundle", "settings": {"product": "cozy-night-bundle", "moment": "After dark", "blurb": "Everything for the perfect wind-down at home.", "savings": "Saves $15"} }
+    }, "block_order": ["desk","kitchen","cozy"], "settings": {} },
+    "faq": { "type": "faq", "blocks": {
+      "q1": { "type": "qa", "settings": {"question": "How fast do orders ship?", "answer": "<p>Most orders ship within 1 to 3 business days. You'll get a tracking link the moment it leaves.</p>"} },
+      "q2": { "type": "qa", "settings": {"question": "Do you offer free shipping?", "answer": "<p>Yes. Free U.S. shipping on every order over $50.</p>"} },
+      "q3": { "type": "qa", "settings": {"question": "What's your return policy?", "answer": "<p><strong>14 days</strong> for general returns (unused items in original packaging). <strong>30 days</strong> for anything that arrives defective or materially not as described, and we cover return shipping in that case. <a href=\"/policies/refund-policy\">See the full refund policy</a>.</p>"} },
+      "q4": { "type": "qa", "settings": {"question": "Where do you ship?", "answer": "<p>We ship across the United States. Tracking is included on every order so you always know where your find is.</p>"} }
+    }, "block_order": ["q1","q2","q3","q4"], "settings": {
+      "eyebrow": "Good to Know",
+      "heading": "Frequently <em>asked</em>",
+      "subheading": "Quick answers from real humans.",
+      "foot_text": "Still have a question?",
+      "foot_button": "Email us",
+      "foot_link": "mailto:support@snagnest.com"
+    }}
+  },
+  "order": ["hero","trust-strip","shop-by-need","featured","bundle-spotlight","faq"]
+}

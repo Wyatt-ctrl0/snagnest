@@ -1,0 +1,20 @@
+<section class="section">
+  <div class="container" style="max-width: 460px;">
+    <h1 class="text-center">Login</h1>
+    {%- form 'customer_login', class: 'contact-form' -%}
+      {%- if form.errors -%}<div class="form-error">{{ form.errors | default_errors }}</div>{%- endif -%}
+      <div><label>Email</label><input type="email" name="customer[email]" required></div>
+      <div><label>Password</label><input type="password" name="customer[password]" required></div>
+      <button type="submit" class="btn btn-primary">Sign In</button>
+      <p class="text-center mt-2"><a href="/account/register">Create account</a> · <a href="#" onclick="document.getElementById('recover').style.display='block';return false;">Forgot password?</a></p>
+    {%- endform -%}
+
+    <div id="recover" style="display:none;margin-top:2rem;">
+      {%- form 'recover_customer_password', class: 'contact-form' -%}
+        <h3>Reset your password</h3>
+        <div><label>Email</label><input type="email" name="email" required></div>
+        <button type="submit" class="btn btn-secondary">Send reset link</button>
+      {%- endform -%}
+    </div>
+  </div>
+</section>

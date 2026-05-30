@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/
+
+# Python scratch
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Shopify CLI
+.shopify/

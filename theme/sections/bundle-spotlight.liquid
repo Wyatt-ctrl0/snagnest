@@ -1,0 +1,106 @@
+{%- assign renderable = 0 -%}
+{%- for block in section.blocks -%}
+  {%- if block.settings.product != blank -%}{%- assign renderable = renderable | plus: 1 -%}{%- endif -%}
+{%- endfor -%}
+{%- if renderable > 0 -%}
+<section class="section bundle-spotlight" data-testid="bundle-spotlight" style="background: var(--color-bg);">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">{{ section.settings.eyebrow | default: 'Bundled by moment' }}</span>
+      <h2>{{ section.settings.heading | default: 'Kits for the <em>moments that matter</em>' }}</h2>
+      <p>{{ section.settings.subheading | default: 'Hand-picked sets for the days that ask a little more. Each one costs less than the items would on their own.' }}</p>
+    </div>
+
+    <div class="bundle-grid">
+      {%- for block in section.blocks -%}
+        {%- assign bundle = block.settings.product -%}
+        {%- if bundle != blank -%}
+          <a class="bundle-card" href="{{ bundle.url }}" {{ block.shopify_attributes }} data-testid="bundle-card-{{ forloop.index }}">
+            <span class="bundle-card-media">
+              {%- if bundle.featured_image != blank -%}
+                <img src="{{ bundle.featured_image | image_url: width: 700 }}" alt="" loading="lazy" width="700" height="525">
+              {%- else -%}
+                <span class="bundle-card-media-fallback" aria-hidden="true">{%- render 'icon-glyph', glyph: 'bag' -%}</span>
+              {%- endif -%}
+              {%- if block.settings.moment != blank -%}
+                <span class="bundle-card-moment">{{ block.settings.moment }}</span>
+              {%- endif -%}
+            </span>
+            <span class="bundle-card-body">
+              <span class="bundle-card-title">{{ bundle.title }}</span>
+              {%- if block.settings.blurb != blank -%}
+                <span class="bundle-card-blurb">{{ block.settings.blurb }}</span>
+              {%- endif -%}
+              <span class="bundle-card-foot">
+                <span class="bundle-card-price">{%- if bundle.price_varies -%}From {% endif -%}{{ bundle.price | money }}</span>
+                {%- if bundle.compare_at_price > bundle.price -%}
+                  <span class="bundle-card-savings">Save {{ bundle.compare_at_price | minus: bundle.price | money }}</span>
+                {%- elsif block.settings.savings != blank -%}
+                  <span class="bundle-card-savings">{{ block.settings.savings }}</span>
+                {%- endif -%}
+              </span>
+            </span>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.show_view_all -%}
+      <div class="text-center mt-4">
+        <a href="/collections/bundles" class="btn btn-outline" data-testid="bundle-view-all">See all kits</a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% stylesheet %}
+.bundle-spotlight .bundle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 1.75rem; }
+.bundle-spotlight .bundle-card { display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; background: #fff; border: 1px solid rgba(31,41,55,0.07); text-decoration: none; color: var(--color-text); transition: transform .18s ease, box-shadow .18s ease; }
+.bundle-spotlight .bundle-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(31,41,55,0.1); }
+.bundle-spotlight .bundle-card:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.bundle-spotlight .bundle-card-media { position: relative; aspect-ratio: 4 / 3; background: #FBF4E7; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.bundle-spotlight .bundle-card-media img { width: 100%; height: 100%; object-fit: cover; }
+.bundle-spotlight .bundle-card-media-fallback { display: flex; align-items: center; justify-content: center; }
+.bundle-spotlight .bundle-card-media-fallback .ms-icon { width: 56px; height: 56px; color: rgba(31,41,55,0.3); }
+.bundle-spotlight .bundle-card-moment { position: absolute; top: .75rem; left: .75rem; background: rgba(255,255,255,0.92); color: var(--color-text); font-family: var(--font-heading); font-weight: 700; font-size: .72rem; letter-spacing: .02em; text-transform: uppercase; padding: .3rem .65rem; border-radius: 999px; }
+.bundle-spotlight .bundle-card-body { display: flex; flex-direction: column; gap: .4rem; padding: 1.1rem 1.25rem 1.35rem; flex: 1; }
+.bundle-spotlight .bundle-card-title { font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; line-height: 1.2; }
+.bundle-spotlight .bundle-card-blurb { font-size: .85rem; color: rgba(31,41,55,0.64); line-height: 1.4; flex: 1; }
+.bundle-spotlight .bundle-card-foot { display: flex; align-items: baseline; gap: .6rem; margin-top: .35rem; }
+.bundle-spotlight .bundle-card-price { font-family: var(--font-heading); font-weight: 800; font-size: 1.05rem; color: var(--color-primary); }
+.bundle-spotlight .bundle-card-savings { font-size: .78rem; font-weight: 700; color: var(--color-secondary); background: rgba(95,180,184,0.14); padding: .12rem .5rem; border-radius: 999px; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Bundle Spotlight",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Bundled by moment" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Kits for the <em>moments that matter</em>" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Hand-picked sets for the days that ask a little more. Each one costs less than the items would on their own." },
+    { "type": "checkbox", "id": "show_view_all", "label": "Show 'See all kits' button", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "bundle",
+      "name": "Bundle",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Bundle product" },
+        { "type": "text", "id": "moment", "label": "Moment label", "default": "New home setup" },
+        { "type": "textarea", "id": "blurb", "label": "Short blurb" },
+        { "type": "text", "id": "savings", "label": "Savings note (manual, e.g. Saves $14)" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [{
+    "name": "Bundle Spotlight",
+    "blocks": [
+      { "type": "bundle", "settings": { "moment": "New home setup", "blurb": "Everything you need to settle in and feel at home from day one." } },
+      { "type": "bundle", "settings": { "moment": "Gift-ready", "blurb": "A set worth giving, beautifully matched and ready to wrap." } },
+      { "type": "bundle", "settings": { "moment": "Weekend refresh", "blurb": "Small upgrades that make the whole space feel new again." } }
+    ]
+  }]
+}
+{% endschema %}

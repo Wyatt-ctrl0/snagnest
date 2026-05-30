@@ -1,0 +1,24 @@
+<section class="thank-you" data-testid="thank-you-page">
+  <div class="container" style="max-width: 720px;">
+    <div class="icon-circle">🎉</div>
+    <h1>Thank you for your <em>order</em>!</h1>
+    <p>Your order is in and we're already getting it ready. You'll get a tracking link the moment it ships, so you always know where your find is.</p>
+
+    <div class="donation-callout">
+      <h3>What happens next</h3>
+      <p style="margin:0;">We pack and ship most orders within 1 to 3 business days. Watch your inbox for a confirmation now and a tracking number soon after.</p>
+      <a href="/pages/help" class="btn btn-secondary mt-3" data-testid="thank-you-donate">Visit the Help Center</a>
+    </div>
+
+    <p style="font-size:0.95rem;color:rgba(31,41,55,0.7);">A confirmation email is on its way. If you have questions, reach us anytime at <a href="mailto:{{ settings.email | default: 'support@snagnest.com' }}">{{ settings.email | default: 'support@snagnest.com' }}</a>.</p>
+
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem;">
+      <a href="/collections/all" class="btn btn-primary" data-testid="thank-you-continue">Keep Shopping</a>
+      <a href="/collections/best-sellers" class="btn btn-outline" data-testid="thank-you-meet-pack">Shop Bestsellers</a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Thank You", "settings": [] }
+{% endschema %}

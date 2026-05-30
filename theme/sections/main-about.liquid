@@ -1,0 +1,33 @@
+<section class="about-hero" data-testid="about-hero">
+  <div class="container">
+    <span class="eyebrow" style="display:inline-block;font-family:var(--font-heading);font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--color-secondary);margin-bottom:1rem;">Our Story</span>
+    <h1>Where it all <em>began</em></h1>
+    <p style="font-size:1.15rem;max-width:560px;margin:0 auto;">A small team. A shared frustration. A better way to shop.</p>
+  </div>
+</section>
+
+<div class="about-content rte">
+  {%- if page.content != blank -%}
+    {{ page.content }}
+  {%- else -%}
+    <h2>From our cart to yours</h2>
+    <p>SnagNest started because we were tired of the same thing you probably are: spending an hour scrolling through endless marketplace listings, unsure which products actually worked and which were just good at paid reviews.</p>
+
+    <p>We are a small team of curious, practical people who genuinely enjoy hunting down products that solve real problems. Home organization, kitchen tools, gadgets that earn their drawer space, gifts that land, outdoor gear that holds up, wellness items worth the shelf room. If it does not pass our own use test, it does not go in the store.</p>
+
+    <h2>How we find what we carry</h2>
+    <p>Every product we stock starts as something one of us wanted to buy. We research it, compare it against alternatives, and only list it when we would feel comfortable recommending it to a friend. That process takes longer than just adding whatever is trending, but it means you can trust what you find here.</p>
+
+    <p>We keep the catalog focused on purpose. A smaller, better selection beats a sprawling one you have to dig through.</p>
+
+    <h2>What we are about</h2>
+    <p>We would rather be a shop you come back to because things worked out than one you forget after a single order. Honest descriptions. Straightforward returns. Real support from real people when something goes wrong.</p>
+
+    <p>Thanks for being here and giving us a shot. We hope you find something genuinely useful.</p>
+    <p><em>The SnagNest team</em></p>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{ "name": "About Page", "settings": [] }
+{% endschema %}

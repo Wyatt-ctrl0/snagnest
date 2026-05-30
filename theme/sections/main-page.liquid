@@ -1,0 +1,12 @@
+<section class="section" data-testid="page-content">
+  <div class="container" style="max-width: 800px;">
+    <h1 class="text-center" style="margin-bottom: 2rem;">{{ page.title }}</h1>
+    <div class="rte" style="font-size:1.05rem;line-height:1.7;">
+      {{ page.content }}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Page", "settings": [] }
+{% endschema %}

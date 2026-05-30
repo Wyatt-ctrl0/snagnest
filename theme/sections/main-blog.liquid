@@ -1,0 +1,42 @@
+<section class="section">
+  <div class="container">
+    <div class="section-head" style="text-align:center;margin-bottom:3rem;">
+      <span class="eyebrow">From the team</span>
+      <h1>{{ blog.title }}</h1>
+      <p>Ideas, guides, and the finds we're excited about right now.</p>
+    </div>
+
+    {%- paginate blog.articles by 12 -%}
+      {%- if blog.articles.size > 0 -%}
+        <div class="products-grid">
+          {%- for article in blog.articles -%}
+            <a href="{{ article.url }}" class="product-card" style="display:block;text-decoration:none;color:inherit;">
+              <div class="media" style="background:var(--color-mint);display:flex;align-items:center;justify-content:center;font-size:3rem;">
+                {%- if article.image -%}
+                  <img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.title }}" style="width:100%;height:100%;object-fit:cover;">
+                {%- else -%}
+                  📦
+                {%- endif -%}
+              </div>
+              <div class="info">
+                <div class="vendor">{{ article.published_at | date: '%B %-d, %Y' }}</div>
+                <h3 class="title" style="font-family:var(--font-heading);margin:.5rem 0;">{{ article.title }}</h3>
+                <p style="color:rgba(31,41,55,0.7);font-size:0.9rem;line-height:1.5;">{{ article.excerpt_or_content | strip_html | truncatewords: 22 }}</p>
+                <span style="color:var(--color-primary);font-weight:600;font-size:0.9rem;">Read more →</span>
+              </div>
+            </a>
+          {%- endfor -%}
+        </div>
+        {%- if paginate.pages > 1 -%}
+          <div style="text-align:center;margin-top:3rem;">{{ paginate | default_pagination }}</div>
+        {%- endif -%}
+      {%- else -%}
+        <p style="text-align:center;color:rgba(31,41,55,0.6);padding:3rem;">No posts yet. Check back soon.</p>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Blog", "settings": [] }
+{% endschema %}

@@ -1,0 +1,35 @@
+<article class="section">
+  <div class="container" style="max-width:760px;">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs" style="margin-bottom:1.5rem;">
+      <a href="/">Home</a> <span>›</span>
+      <a href="/blogs/{{ blog.handle }}">{{ blog.title }}</a> <span>›</span>
+      <span aria-current="page">{{ article.title }}</span>
+    </nav>
+
+    <header style="text-align:center;margin-bottom:2.5rem;">
+      <div class="vendor" style="text-transform:uppercase;letter-spacing:.15em;color:var(--color-secondary);font-size:.85rem;font-weight:700;margin-bottom:1rem;">{{ article.published_at | date: '%B %-d, %Y' }}{%- if article.author -%} · by {{ article.author }}{%- endif -%}</div>
+      <h1 style="font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.5rem);margin:0 0 1rem;">{{ article.title }}</h1>
+      {%- if article.image -%}
+        <img src="{{ article.image | image_url: width: 1400 }}" alt="{{ article.title }}" style="width:100%;border-radius:24px;margin-top:2rem;">
+      {%- endif -%}
+    </header>
+
+    <div class="rte" style="font-size:1.05rem;line-height:1.7;">{{ article.content }}</div>
+
+    {%- if article.tags.size > 0 -%}
+      <div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid rgba(31,41,55,0.1);">
+        {%- for tag in article.tags -%}
+          <span style="display:inline-block;background:rgba(95,180,184,0.15);color:var(--color-secondary);padding:.35rem .75rem;border-radius:999px;font-size:.8rem;font-weight:600;margin-right:.5rem;">{{ tag }}</span>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <div style="text-align:center;margin-top:3rem;">
+      <a href="/blogs/{{ blog.handle }}" class="btn btn-outline">← More from {{ blog.title }}</a>
+    </div>
+  </div>
+</article>
+
+{% schema %}
+{ "name": "Article", "settings": [] }
+{% endschema %}

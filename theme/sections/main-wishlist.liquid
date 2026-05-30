@@ -1,0 +1,37 @@
+<div class="wishlist-page" data-testid="wishlist-page">
+  <div class="container">
+    <header class="wishlist-header">
+      <div>
+        <span class="eyebrow">Saved for later</span>
+        <h1 class="wishlist-title">Your <em>wishlist</em></h1>
+        <p class="wishlist-subtitle" data-wishlist-subtitle>Loading your saved goodies…</p>
+      </div>
+      <div class="wishlist-actions">
+        <button type="button" class="btn btn-primary" data-wishlist-add-all data-testid="wishlist-add-all" hidden>
+          🛒 Add all to cart
+        </button>
+        <button type="button" class="btn btn-outline" data-wishlist-clear data-testid="wishlist-clear" hidden>
+          Clear wishlist
+        </button>
+      </div>
+    </header>
+
+    <div class="wishlist-empty" data-wishlist-empty>
+      <div class="wishlist-empty-icon">🛍️</div>
+      <h2>No favorites yet</h2>
+      <p>Tap the heart on any product and we'll save it here for later.</p>
+      <a href="/collections/all" class="btn btn-primary" data-testid="wishlist-empty-shop">Start exploring</a>
+    </div>
+
+    <ul class="wishlist-grid" data-wishlist-grid hidden></ul>
+
+    <div class="wishlist-toast" data-wishlist-toast aria-live="polite"></div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Wishlist",
+  "settings": []
+}
+{% endschema %}

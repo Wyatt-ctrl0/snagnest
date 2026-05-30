@@ -1,0 +1,16 @@
+{%- comment -%}
+  v18: stylesheet for product-card-wrap, rendered once per page via the
+  parent collection section. Avoids 24x inline-style duplication that
+  product-card.liquid had when it inlined these rules itself.
+  Wishlist-heart position matches assets/theme.css (top/right 0.85rem)
+  so the un-nesting refactor doesn't shift visual positioning.
+{%- endcomment -%}
+<style>
+  .product-card-wrap { position: relative; display: block; }
+  .product-card-wrap .wishlist-heart {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    z-index: 2;
+  }
+</style>

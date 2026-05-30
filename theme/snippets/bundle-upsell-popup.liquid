@@ -1,0 +1,62 @@
+{%- comment -%}
+  v4: bundle picked based on cart context (first item's tags) instead of
+  hardcoded collections.bundles.products.first.
+  v18 (2026-05-26): availability filter + 'Bundle option' eyebrow softened
+  from 'Wait, one more thing'.
+  v21 (2026-05-28): removed the sparkle emoji entity from the primary CTA
+  per the no-emoji-as-icons rule.
+{%- endcomment -%}
+{%- if settings.bundle_upsell_enabled -%}
+  {%- assign upsell_bundle = blank -%}
+  {%- if cart.items.size > 0 -%}
+    {%- assign primary_item = cart.items.first.product -%}
+    {%- for bundle in collections.bundles.products -%}
+      {%- if bundle.id == primary_item.id -%}{%- continue -%}{%- endif -%}
+      {%- unless bundle.available -%}{%- continue -%}{%- endunless -%}
+      {%- for tag in primary_item.tags -%}
+        {%- if bundle.tags contains tag -%}
+          {%- assign upsell_bundle = bundle -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if upsell_bundle != blank -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if upsell_bundle == blank -%}
+    {%- for bundle in collections.bundles.products -%}
+      {%- if bundle.available -%}
+        {%- assign upsell_bundle = bundle -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if upsell_bundle != blank -%}
+    {%- assign upsell_save = upsell_bundle.compare_at_price | minus: upsell_bundle.price -%}
+    <div class="bundle-upsell-popup" data-bundle-upsell-popup role="dialog" aria-modal="true" aria-labelledby="bundle-upsell-title" aria-hidden="true">
+      <div class="bundle-upsell-inner">
+        <button class="bundle-upsell-close" data-bundle-upsell-close aria-label="Close popup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <span class="bundle-upsell-eyebrow">Bundle option</span>
+        <h2 class="bundle-upsell-title" id="bundle-upsell-title">Save when you bundle</h2>
+        <p class="bundle-upsell-subtitle">Add the {{ upsell_bundle.title }} to your order.</p>
+        {%- if upsell_bundle.featured_image -%}
+          <div class="bundle-upsell-image" style="text-align:center;margin:1rem 0;">
+            <img src="{{ upsell_bundle.featured_image | image_url: width: 400 }}" alt="{{ upsell_bundle.title }}" style="max-width:220px;border-radius:16px;">
+          </div>
+        {%- endif -%}
+        <div class="bundle-upsell-pricing">
+          {%- if upsell_save > 0 -%}
+            <div class="row"><span>À la carte</span><span class="bundle-upsell-strike" style="text-decoration:line-through;color:rgba(31,41,55,0.78);">{{ upsell_bundle.compare_at_price | money }}</span></div>
+            <div class="row save"><span>You save</span><span>&minus; {{ upsell_save | money }}</span></div>
+          {%- endif -%}
+          <div class="row total"><span>Bundle price</span><span>{{ upsell_bundle.price | money }}</span></div>
+        </div>
+        <div class="bundle-upsell-actions">
+          <a href="{{ upsell_bundle.url }}" class="btn btn-primary btn-block">See the bundle</a>
+          <button type="button" class="bundle-upsell-skip" data-bundle-upsell-skip aria-label="Skip bundle and go to checkout">No thanks, just take me to checkout</button>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+{%- endif -%}

@@ -1,0 +1,147 @@
+/* MOLLY & SOPHIE v7 patch stylesheet */
+
+@media (max-width: 768px) {
+  body { overflow-x: hidden; }
+  .product-page { overflow-x: hidden; }
+  .product-page .container { overflow-x: hidden; max-width: 100%; }
+  .product-grid-main { min-width: 0; }
+  .product-grid-main > * { min-width: 0; max-width: 100%; }
+  .product-gallery { max-width: 100%; min-width: 0; overflow: hidden; }
+  .product-gallery img, .product-gallery .main-img, .product-bundle img, .product-bundle-image img { max-width: 100%; height: auto; display: block; }
+  .product-thumbs { max-width: 100%; overflow-x: auto; }
+  .product-details { min-width: 0; }
+  .product-details > * { max-width: 100%; }
+}
+
+.promo-popup [data-promo-copy].is-copied { background: #2da06a !important; pointer-events: none; }
+
+.cart-page-shipping-bar { margin: 1.5rem 0; padding: 1rem 1.25rem; background: #F6ECDA; border-radius: 12px; }
+.cart-page-shipping-bar .shipping-bar-text { font-size: 0.95rem; margin-bottom: 0.5rem; }
+.cart-page-shipping-bar .shipping-progress { width: 100%; height: 8px; background: rgba(0,0,0,0.08); border-radius: 4px; overflow: hidden; }
+.cart-page-shipping-bar .shipping-progress-fill { height: 100%; background: var(--color-primary, #C9683E); border-radius: 4px; transition: width 0.3s ease; }
+.cart-page-shipping-bar .shipping-progress-fill.is-complete { background: #2da06a; }
+.cart-page .cart-item-remove-link { color: rgba(31,41,55,0.55); text-decoration: underline; font-size: 0.8rem; background: none; border: none; cursor: pointer; padding: 0; margin-top: 0.25rem; }
+.cart-page-promo { margin: 1.5rem 0; padding: 1rem 1.25rem; background: #FFF8EC; border-radius: 12px; }
+.cart-page-promo label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+.cart-page-promo .promo-form { display: flex; gap: 0.5rem; }
+.cart-page-promo input[type="text"] { flex: 1; padding: 0.6rem 1rem; border: 1px solid rgba(0,0,0,0.12); border-radius: 999px; font-size: 0.9rem; }
+
+.page-styled-hero { padding: 4rem 1.5rem 2.5rem; text-align: center; background: linear-gradient(180deg, #FBF4E7 0%, #FBF4E7 70%, transparent 100%); }
+.page-styled-hero .eyebrow { display: inline-block; font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--color-secondary, #E0A458); margin-bottom: 1rem; }
+.page-styled-hero h1 { font-size: clamp(2.4rem, 5vw, 3.5rem); margin: 0 0 1rem; }
+.page-styled-hero .page-styled-sub { font-size: 1.05rem; color: rgba(31,41,55,0.65); max-width: 620px; margin: 0 auto; }
+.page-styled-body { max-width: 760px; margin: 0 auto; padding: 1.5rem; font-size: 1.05rem; line-height: 1.75; }
+.page-styled-body h2 { margin-top: 2rem; }
+.page-styled-body ul, .page-styled-body ol { padding-left: 1.5rem; }
+.page-styled-body li { margin-bottom: 0.5rem; }
+.page-styled-body a { color: var(--color-primary, #C9683E); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+@media (max-width: 768px) {
+  .page-styled-hero { padding: 2.5rem 1rem 1.5rem; }
+  .page-styled-body { padding: 1rem; font-size: 1rem; }
+}
+
+/* v7: Header logo */
+header .header-logo .header-logo-img, header img.header-logo-img, .site-header .header-logo-img { width: auto !important; height: 180px !important; max-width: 100%; display: block; object-fit: contain; }
+@media (max-width: 1024px) { header .header-logo .header-logo-img, header img.header-logo-img, .site-header .header-logo-img { height: 140px !important; } }
+@media (max-width: 768px) { header .header-logo .header-logo-img, header img.header-logo-img, .site-header .header-logo-img { height: 110px !important; } }
+
+/* v9: Judge.me empty-state force-show */
+#judgeme_product_reviews_preview { display: block !important; margin: 0.5rem 0 1rem; }
+.jdgm-prev-badge { display: inline-block !important; }
+.jdgm-prev-badge .jdgm-prev-badge__stars { display: inline-block !important; }
+.jdgm-prev-badge__text, .jdgm-prev-badge__link, a.jdgm-write-rev-link { display: inline-block !important; color: var(--color-primary, #C9683E); text-decoration: underline; font-size: 0.9rem; margin-left: 0.25rem; }
+#judgeme_product_reviews { display: block !important; margin: 2rem 0; }
+.jdgm-rev-widg { display: block !important; min-height: 80px; }
+.jdgm-rev-widg__title { display: block !important; font-family: var(--font-heading); font-size: 1.4rem; margin: 0 0 1rem; }
+.jdgm-rev-widg__summary { display: block !important; }
+
+/* ==========================================================================
+   v11: Accessibility patch — 2026-05-17 (final)
+   - Primary CTA contrast 2.93 → 5.01 (white → charcoal on orange)
+   - Touch targets >=44px on all interactive elements
+   - Stronger keyboard focus indicators
+   ========================================================================== */
+
+.btn-primary, .btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+button.btn-primary, a.btn-primary,
+button.btn[name="checkout"], button[type="submit"].btn,
+.product-bundle-btn, a.product-bundle-btn,
+.btn-block.btn-primary {
+  color: #2B2622 !important;
+}
+
+.skip-to-content, .skip-link,
+.skip-to-content:focus, .skip-link:focus,
+a[href="#main"]:focus, a[href="#content"]:focus {
+  color: #2B2622 !important;
+}
+
+.qty-control button, .qty-control a,
+.product-quantity button, .product-quantity a,
+.cart-item-controls a, .cart-item-controls button,
+[class*="qty"] button, [class*="quantity"] button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+button.option-value, .option-value { min-height: 44px; }
+
+button.wishlist-heart, .wishlist-heart, button[class*="wishlist"] {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Cart Remove — covers BOTH cart-item-remove (drawer) AND cart-item-remove-link (page) */
+button.cart-item-remove, a.cart-item-remove, .cart-item-remove,
+.cart-item-remove-link, a.cart-item-remove-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 44px !important;
+  padding: 0.5rem 0.25rem !important;
+}
+
+.bundle-upsell-close, .bundle-upsell-skip {
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #E0A458 !important;
+  outline-offset: 2px !important;
+}
+
+/* ==========================================================================
+   v21: design-quality lift — 2026-05-28
+   - Inline SVG icon base (replaces emoji-as-icons site-wide)
+   - prefers-reduced-motion: honor it for DECORATIVE motion only
+     (entrance reveals + card hover transforms). The hero rotator
+     cross-fade is intentionally kept per owner preference — it is a
+     passive opacity transition on .hero-rotator-img, not matched here.
+   ========================================================================== */
+
+.ms-icon { flex-shrink: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Decorative entrance reveals: show content immediately, no movement. */
+  .fade-up, .reveal, [class*="fade-up"], [class*="fade-up-delay"] {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Card hover lifts shift position — drop the transform, keep the
+     non-moving shadow/border feedback. (Note: .rp-polaroid is intentionally
+     excluded — theme.css already keeps its static tilt for reduced-motion
+     users as a deliberate design choice; do not override it.) */
+  .need-tile:hover, .bundle-card:hover, .product-card-wrap:hover {
+    transform: none !important;
+  }
+}

@@ -1,0 +1,127 @@
+{%- comment -%}
+  SnagNest hero. Shows the owner-set hero image if present; otherwise a tasteful
+  gradient placeholder so nothing renders broken before product photography is in.
+{%- endcomment -%}
+<section class="hero" data-testid="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="fade-up reveal">
+        <span class="hero-eyebrow">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 4a4 4 0 0 1 4 4v.5l4 1.5v3l-3-1v9a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-3a2 2 0 0 0-4 0v3a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8l4-1.5V8a4 4 0 0 1 4-4z" transform="translate(2 2)"/></svg>
+          Curated by real humans
+        </span>
+        <h1>{{ section.settings.heading | default: 'Trending finds, <em>curated for you</em>' }}</h1>
+        <p>{{ section.settings.subheading | default: 'We hunt down the clever, problem-solving products worth buying, then put them all in one place so you don''t have to dig.' }}</p>
+        <div class="hero-cta">
+          <a href="{{ section.settings.cta_link | default: '/collections/all' }}" class="btn btn-primary" data-testid="hero-cta-shop">{{ section.settings.cta_text | default: 'Shop bestsellers' }}</a>
+          <a href="/pages/about" class="btn btn-outline" data-testid="hero-cta-story">Our Story</a>
+        </div>
+      </div>
+      <div style="position: relative;" class="fade-up fade-up-delay-1">
+        <div class="hero-image-wrap">
+          {%- if section.settings.image != blank -%}
+            <img src="{{ section.settings.image | image_url: width: 800 }}" alt="SnagNest featured find" class="hero-rotator-img is-active">
+          {%- else -%}
+            <div class="hero-placeholder" aria-hidden="true">SnagNest</div>
+          {%- endif -%}
+        </div>
+        <div class="hero-badge">{{ section.settings.badge_text | default: 'Free U.S. shipping over $50' }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  /* SnagNest hero placeholder (shown until owner sets a hero image). */
+  .hero-placeholder {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; aspect-ratio: 4 / 5; border-radius: 16px;
+    background: linear-gradient(150deg, #F3E9D6 0%, #F0DCC0 60%, #E7C79B 100%);
+    font-family: var(--font-heading, serif);
+    font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700;
+    color: var(--color-primary, #C9683E); letter-spacing: 0.01em;
+    box-shadow: inset 0 0 0 1px rgba(43,38,34,0.06);
+  }
+  /* Hero rotator: stack all images absolutely, cross-fade between them. */
+  .hero-image-wrap[data-hero-rotator] { position: relative; }
+  .hero-image-wrap[data-hero-rotator] .hero-rotator-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 800ms ease-in-out;
+    will-change: opacity;
+  }
+  .hero-image-wrap[data-hero-rotator] .hero-rotator-img.is-active { opacity: 1; }
+  /* If only one image (single picker override) it sits naturally with no animation. */
+  .hero-image-wrap[data-hero-rotator] .hero-rotator-img:only-child {
+    position: static;
+    opacity: 1;
+    transition: none;
+  }
+  /* v20.3 (2026-05-27): the opacity cross-fade is mild enough (no spatial motion)
+     that it's appropriate even for prefers-reduced-motion users. Owner has
+     reduced-motion enabled and wants the fade kept. Per WCAG SC 2.3.3 this is
+     defensible since "animation from interactions" doesn't apply to passive
+     cross-fades on auto-rotating content (the relevant criterion 2.2.2 is about
+     pause control, not fade duration). */
+{% endstylesheet %}
+
+<script>
+(function() {
+  'use strict';
+  // v20.4 (2026-05-27): hero photo rotator with proper teardown.
+  //   - 3s interval per owner feedback.
+  //   - Stores the interval handle so Shopify's section:unload event can clear it.
+  //   - Skips ticks while the tab is hidden so we don't waste cycles on a backgrounded page.
+  //   - Guards against double-init if the wrapper already has an interval attached.
+  function initHeroRotator() {
+    var wrap = document.querySelector('[data-hero-rotator]');
+    if (!wrap || wrap.__heroIntervalId) return;
+    var slides = wrap.querySelectorAll('.hero-rotator-img');
+    if (slides.length < 2) return;
+
+    var idx = 0;
+    var INTERVAL = 3000;
+    var handle = setInterval(function() {
+      if (document.hidden) return;
+      slides[idx].classList.remove('is-active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('is-active');
+    }, INTERVAL);
+    wrap.__heroIntervalId = handle;
+  }
+  function teardownHeroRotator() {
+    var wrap = document.querySelector('[data-hero-rotator]');
+    if (wrap && wrap.__heroIntervalId) {
+      clearInterval(wrap.__heroIntervalId);
+      wrap.__heroIntervalId = null;
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroRotator);
+  } else {
+    initHeroRotator();
+  }
+  // Shopify theme editor section reload + bfcache pageshow safety
+  document.addEventListener('shopify:section:unload', teardownHeroRotator);
+  document.addEventListener('shopify:section:load', initHeroRotator);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Trending finds, <em>curated for you</em>" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "We hunt down the clever, problem-solving products worth buying, then put them all in one place so you don't have to dig." },
+    { "type": "text", "id": "cta_text", "label": "Button text", "default": "Shop bestsellers" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+    { "type": "image_picker", "id": "image", "label": "Hero image" },
+    { "type": "text", "id": "badge_text", "label": "Badge text", "default": "Free U.S. shipping over $50" }
+  ],
+  "presets": [{ "name": "Hero" }]
+}
+{% endschema %}

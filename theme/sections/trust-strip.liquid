@@ -1,0 +1,54 @@
+<section class="trust-strip" data-testid="trust-strip">
+  <div class="container">
+    <div class="trust-grid">
+      {% for block in section.blocks %}
+        <div class="trust-item" {{ block.shopify_attributes }} data-testid="trust-{{ forloop.index }}">
+          <div class="trust-icon" aria-hidden="true">{%- render 'icon-glyph', glyph: block.settings.icon -%}</div>
+          <div class="trust-text">
+            <div class="trust-title">{{ block.settings.title }}</div>
+            <div class="trust-sub">{{ block.settings.sub }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.trust-strip { background: var(--color-bg); border-bottom: 1px dashed rgba(31,41,55,0.1); padding: 1.25rem 0; }
+.trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; text-align: center; }
+.trust-item { display: flex; align-items: center; justify-content: center; gap: .75rem; }
+.trust-icon { font-size: 1.65rem; display: flex; align-items: center; }
+.trust-icon .ms-icon { width: 26px; height: 26px; color: var(--color-secondary, #E0A458); display: block; }
+.trust-text { text-align: left; }
+.trust-title { font-family: var(--font-heading); font-weight: 800; font-size: .9rem; line-height: 1.2; }
+.trust-sub { font-size: .75rem; color: rgba(31,41,55,0.6); }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Trust Strip",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "trust",
+      "name": "Trust Item",
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icon key (truck, returns, heart, shield) or emoji", "default": "truck" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Free shipping $50+" },
+        { "type": "text", "id": "sub", "label": "Subtext", "default": "Ships from the USA" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{
+    "name": "Trust Strip",
+    "blocks": [
+      { "type": "trust", "settings": { "icon": "truck", "title": "Free shipping $50+", "sub": "Ships from the USA" } },
+      { "type": "trust", "settings": { "icon": "returns", "title": "14-day returns", "sub": "See refund policy" } },
+      { "type": "trust", "settings": { "icon": "heart", "title": "1% to HSPA", "sub": "Every single order" } },
+      { "type": "trust", "settings": { "icon": "shield", "title": "Secure checkout", "sub": "Powered by Shopify" } }
+    ]
+  }]
+}
+{% endschema %}
