@@ -18,3 +18,6 @@ node_modules/
 
 # Playwright CLI scratch
 .playwright-cli/
+
+# Playwright CLI scratch
+.playwright-cli/
