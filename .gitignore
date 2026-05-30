@@ -15,3 +15,6 @@ node_modules/
 
 # Shopify CLI
 .shopify/
+
+# Playwright CLI scratch
+.playwright-cli/
